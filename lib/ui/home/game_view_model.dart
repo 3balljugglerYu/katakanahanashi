@@ -3,7 +3,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../../data/katakana_words.dart';
 import '../../data/repositories/word_rating_repository.dart';
 import '../../data/models/simple_rating.dart';
-import '../../data/models/word_rating.dart';
+import '../../data/services/word_duplication_service.dart';
 import '../../domain/repository/katakana_word.dart';
 import 'game_state.dart';
 
@@ -46,32 +46,54 @@ class GameViewModel extends StateNotifier<GameState> {
   }
 
   void _initializeGame() async {
-    state = state.copyWith(isLoading: true, errorMessage: null);
+    // ゲーム開始時に必ずcurrentQuestionIndexを0にリセット
+    state = state.copyWith(
+      isLoading: true, 
+      errorMessage: null, 
+      currentQuestionIndex: 0
+    );
     
     try {
       // Supabaseからワードを取得
       final wordsFromDb = await _repository.getWords();
       
       if (wordsFromDb.isNotEmpty) {
-        // データベースにワードがある場合はそれを使用
-        final shuffled = [...wordsFromDb];
-        shuffled.shuffle(Random());
-        
-        state = state.copyWith(
-          shuffledWords: shuffled.take(state.totalQuestions).toList(),
-          isLoading: false,
-        );
+        // データベースにワードがある場合は重複防止を適用
+        await _useDatabaseWords(wordsFromDb);
       } else {
-        // データベースが空の場合はローカルデータを使用
+        // データベースが空の場合はローカルデータを使用（重複防止なし）
         _useLocalWords();
       }
     } catch (e) {
-      // エラーの場合もローカルデータを使用
+      // エラーの場合もローカルデータを使用（重複防止なし）
       _useLocalWords();
       state = state.copyWith(
         errorMessage: 'ネットワークエラーのためローカルデータを使用します',
       );
     }
+  }
+  
+  Future<void> _useDatabaseWords(List<KatakanaWord> wordsFromDb) async {
+    // データベースの総ワード数を保存
+    await WordDuplicationService.setTotalDbWordsCount(wordsFromDb.length);
+    
+    // 重複防止フィルタリングを適用
+    final availableWords = await WordDuplicationService.filterAvailableWords(
+      wordsFromDb,
+      (word) => word.id ?? '',
+    );
+    
+    // シャッフルして選択
+    final shuffled = [...availableWords];
+    shuffled.shuffle(Random());
+    
+    state = state.copyWith(
+      shuffledWords: shuffled.take(state.totalQuestions).toList(),
+      isLoading: false,
+      currentQuestionIndex: 0, // 確実に0から開始
+    );
+    
+    print('GameViewModel - New game started with ${shuffled.take(state.totalQuestions).length} words, currentQuestionIndex: 0');
   }
   
   void _useLocalWords() {
@@ -81,10 +103,19 @@ class GameViewModel extends StateNotifier<GameState> {
     state = state.copyWith(
       shuffledWords: shuffled.take(state.totalQuestions).toList(),
       isLoading: false,
+      currentQuestionIndex: 0, // 確実に0から開始
     );
+    
+    print('GameViewModel - New game started with local words, currentQuestionIndex: 0');
   }
 
   void nextQuestion() {
+    // 現在のワードを使用済みにマーク（データベースワードのみ）
+    final currentWord = state.shuffledWords[state.currentQuestionIndex];
+    if (currentWord.id != null && WordDuplicationService.isDatabaseWord(currentWord.id)) {
+      WordDuplicationService.markWordAsUsed(currentWord.id!);
+    }
+    
     // 最後の問題を超えないようにチェック
     final nextIndex = state.currentQuestionIndex + 1;
     
@@ -92,9 +123,14 @@ class GameViewModel extends StateNotifier<GameState> {
       state = state.copyWith(
         currentQuestionIndex: nextIndex,
       );
+      print('GameViewModel - Moved to question ${nextIndex + 1}/${state.totalQuestions}');
     } else {
       // ゲームが終了した場合の処理
       print('Game completed. Question index would be $nextIndex but only have ${state.shuffledWords.length} words.');
+      
+      // 残りの一意のワード数をログ出力
+      _logRemainingWords();
+      
       // インデックスは最後の位置のままにする（範囲外にしない）
       state = state.copyWith(
         currentQuestionIndex: state.shuffledWords.length - 1,
@@ -102,9 +138,55 @@ class GameViewModel extends StateNotifier<GameState> {
     }
   }
 
+  /// 残りの一意のワード数をログ出力
+  Future<void> _logRemainingWords() async {
+    try {
+      final totalDbWords = await WordDuplicationService.getTotalDbWordsCount();
+      final usedWords = await WordDuplicationService.getUsedWordIds();
+      final remainingWords = totalDbWords - usedWords.length;
+      
+      print('=== ゲーム終了時のワード状況 ===');
+      print('データベース総ワード数: $totalDbWords');
+      print('使用済みワード数: ${usedWords.length}');
+      print('残りの一意のワード数: $remainingWords');
+      print('===============================');
+    } catch (e) {
+      print('残りワード数の取得に失敗: $e');
+    }
+  }
+
+  /// ゲーム終了後のリセット判定と実行
+  Future<bool> checkAndResetIfNeeded() async {
+    try {
+      final shouldReset = await WordDuplicationService.shouldResetAfterGame();
+      
+      if (shouldReset) {
+        print('WordDuplicationService - Executing reset after game completion');
+        await WordDuplicationService.resetUsedWords();
+        
+        // リセット後の状況をログ出力
+        final totalDbWords = await WordDuplicationService.getTotalDbWordsCount();
+        final usedWords = await WordDuplicationService.getUsedWordIds();
+        final remainingWords = totalDbWords - usedWords.length;
+        
+        print('=== リセット後のワード状況 ===');
+        print('データベース総ワード数: $totalDbWords');
+        print('使用済みワード数: ${usedWords.length}');
+        print('残りの一意のワード数: $remainingWords');
+        print('===============================');
+        
+        return true; // リセットが実行された
+      }
+      
+      return false; // リセットは不要
+    } catch (e) {
+      print('リセット判定に失敗: $e');
+      return false;
+    }
+  }
+
   bool get isLastQuestion => 
-      state.currentQuestionIndex >= state.totalQuestions - 1 || 
-      state.currentQuestionIndex >= state.shuffledWords.length - 1;
+      state.currentQuestionIndex >= state.totalQuestions - 1;
   
   void resetGame() {
     state = const GameState();

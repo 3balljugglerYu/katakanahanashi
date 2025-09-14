@@ -314,7 +314,17 @@ class GamePage extends ConsumerWidget {
   
   void _proceedToNext(BuildContext context, GameViewModel gameViewModel) {
     if (gameViewModel.isLastQuestion) {
-      gameViewModel.resetGame();
+      // 最後の問題の場合は、nextQuestion()を呼び出してからトップ画面に戻る
+      // これにより最後のワードがSharedPreferencesに登録される
+      gameViewModel.nextQuestion();
+      
+      // ゲーム終了後のリセット判定と実行（非同期で実行）
+      gameViewModel.checkAndResetIfNeeded().then((wasReset) {
+        if (wasReset) {
+          print("GameViewModel - Reset executed after game completion");
+        }
+      });
+      
       if (context.mounted) {
         Navigator.pushNamedAndRemoveUntil(
           context,
