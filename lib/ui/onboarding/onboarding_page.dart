@@ -79,8 +79,9 @@ class OnboardingPage extends ConsumerWidget {
 
       // 2ページ目: ゲームの遊び方
       PageViewModel(
-        title: "ルール\nカタカナは使わない",
-        body: "お題を、カタカナを一切使わずに説明してください。\n"
+        title: "ルール\n『カタカナは使わない』",
+        body:
+            "お題をカタカナを一切使わずに説明してください。\n"
             "『コンピューター』→「計算をする電子の機械」",
         image: _buildImageWidget(context, semanticsLabel: "カタカナ禁止ルールの説明イラスト"),
         decoration: _buildPageDecoration(context),
@@ -89,18 +90,26 @@ class OnboardingPage extends ConsumerWidget {
       // 3ページ目: 楽しみ方
       PageViewModel(
         title: "聞いて想像し、\nズバリ当てよう！",
-        body: "説明を手がかりに、思い浮かんだ答えを言いましょう！正解したら次へ！\n"
+        body:
+            "説明を手がかりに、思い浮かんだ答えを言いましょう！正解したら次へ！\n"
             "※1セット10個のお題が表示されます。\n",
-        image: _buildImageWidget(context, semanticsLabel: "説明を聞いて答えを当てる場面のイラスト"),
+        image: _buildImageWidget(
+          context,
+          semanticsLabel: "説明を聞いて答えを当てる場面のイラスト",
+        ),
         decoration: _buildPageDecoration(context),
       ),
 
       // 4ページ目: 楽しみ方
       PageViewModel(
         title: "みんなで遊んで、\nそして、難易度を評価！",
-        body: "家族や友だちとプレイして、楽しもう！\n"
+        body:
+            "家族や友だちとプレイして、楽しもう！\n"
             "お題終了後に難しさを評価してください。今後のゲームバランス調整に役立ちます。",
-        image: _buildImageWidget(context, semanticsLabel: "複数人で遊び、難易度を評価するイラスト"),
+        image: _buildImageWidget(
+          context,
+          semanticsLabel: "複数人で遊び、難易度を評価するイラスト",
+        ),
         decoration: _buildPageDecoration(context),
       ),
     ];
