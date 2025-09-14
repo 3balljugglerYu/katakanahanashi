@@ -184,38 +184,13 @@ class RatingDialog extends HookConsumerWidget {
           ),
           
           const SizedBox(height: 16),
-          if (word.id == null)
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.yellow.shade100,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.orange.shade300),
-              ),
-              child: Row(
-                children: [
-                  const Icon(Icons.warning, color: Colors.orange, size: 16),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      'ローカルデータのため評価は保存されません',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.orange.shade800,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            )
-          else
-            Text(
-              '※ 難易度は必須、Good/Badは任意です',
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey.shade600,
-              ),
+          Text(
+            '※ 難易度は必須、Good/Badは任意です',
+            style: TextStyle(
+              fontSize: 12,
+              color: Colors.grey.shade600,
             ),
+          ),
         ],
       ),
       actions: [

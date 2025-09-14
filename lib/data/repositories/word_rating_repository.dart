@@ -10,7 +10,7 @@ import '../../domain/repository/katakana_word.dart';
 class NetworkException implements Exception {
   final String message;
   const NetworkException(this.message);
-  
+
   @override
   String toString() => message;
 }
@@ -18,7 +18,7 @@ class NetworkException implements Exception {
 class DatabaseException implements Exception {
   final String message;
   const DatabaseException(this.message);
-  
+
   @override
   String toString() => message;
 }
@@ -26,7 +26,7 @@ class DatabaseException implements Exception {
 class UnknownException implements Exception {
   final String message;
   const UnknownException(this.message);
-  
+
   @override
   String toString() => message;
 }
@@ -38,18 +38,26 @@ class WordRatingRepository {
   Future<void> submitRating(SimpleRating rating) async {
     try {
       print('Repository - Submitting rating for wordId: ${rating.wordId}');
-      
+
       // RPC関数を使用して更新（SQLインジェクション対策）
-      await _supabase.rpc('update_word_rating', params: {
-        'p_word_id': rating.wordId,
-        'p_difficulty': rating.difficulty.name,
-        'p_is_good': rating.isGood,
-        'p_is_bad': rating.isBad,
-      }).timeout(
-        const Duration(seconds: 10),
-        onTimeout: () => throw TimeoutException('評価の送信がタイムアウトしました', const Duration(seconds: 10)),
-      );
-      
+      await _supabase
+          .rpc(
+            'update_word_rating',
+            params: {
+              'p_word_id': rating.wordId,
+              'p_difficulty': rating.difficulty.name,
+              'p_is_good': rating.isGood,
+              'p_is_bad': rating.isBad,
+            },
+          )
+          .timeout(
+            const Duration(seconds: 1),
+            onTimeout: () => throw TimeoutException(
+              '評価の送信がタイムアウトしました',
+              const Duration(seconds: 1),
+            ),
+          );
+
       print('Repository - Successfully updated word stats');
     } on TimeoutException {
       throw const NetworkException('通信がタイムアウトしました。ネットワーク接続を確認してください。');
@@ -72,8 +80,11 @@ class WordRatingRepository {
           .select()
           .order('word')
           .timeout(
-            const Duration(seconds: 15),
-            onTimeout: () => throw TimeoutException('データ取得がタイムアウトしました', const Duration(seconds: 15)),
+            const Duration(seconds: 3),
+            onTimeout: () => throw TimeoutException(
+              'データ取得がタイムアウトしました',
+              const Duration(seconds: 3),
+            ),
           );
 
       return (response as List)
