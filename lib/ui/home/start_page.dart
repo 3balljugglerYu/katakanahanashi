@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../../navigator/app_router.dart';
-import '../../data/services/word_duplication_service.dart';
+import '../onboarding/onboarding_page.dart';
 import 'game_view_model.dart';
 import 'widgets/particle_background.dart';
 
@@ -109,6 +109,45 @@ class StartPage extends ConsumerWidget {
                       fontSize: MediaQuery.of(context).size.width * 0.06,
                       fontWeight: FontWeight.bold,
                     ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                // ルール再確認ボタン
+                TextButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const OnboardingPage(),
+                      ),
+                    );
+                  },
+                  style: TextButton.styleFrom(
+                    foregroundColor: Colors.orange.shade700,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.help_outline,
+                        size: 18,
+                        color: Colors.orange.shade700,
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        'ルールを再確認',
+                        style: TextStyle(
+                          fontSize: MediaQuery.of(context).size.width * 0.04,
+                          fontWeight: FontWeight.w600,
+                          decoration: TextDecoration.underline,
+                          decorationColor: Colors.orange.shade700,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 // 使用ワードのリセット機能：一旦、不要

@@ -68,6 +68,9 @@ dependencies:
   
   # Particles animation
   particles_flutter: ^1.0.1
+  
+  # Onboarding screen
+  introduction_screen: ^4.0.0
 
 dev_dependencies:
   flutter_test:
