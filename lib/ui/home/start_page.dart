@@ -65,9 +65,12 @@ class StartPage extends ConsumerWidget {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: Text(
-                    'カタカナ語を使わずに説明しよう！',
+                    'カタカナを使わずに説明しよう！',
                     style: TextStyle(
                       fontSize: MediaQuery.of(context).size.width * 0.045,
+                      fontStyle: FontStyle.italic,
+                      fontWeight: FontWeight.w900,
+
                       color: Colors.orange.shade600,
                     ),
                     textAlign: TextAlign.center,
@@ -101,84 +104,85 @@ class StartPage extends ConsumerWidget {
                     shadowColor: Colors.orange.withValues(alpha: 0.4),
                   ),
                   child: Text(
-                    '🎯 スタート',
+                    'スタート',
                     style: TextStyle(
                       fontSize: MediaQuery.of(context).size.width * 0.06,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),
-                const SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: () async {
-                    // 確認ダイアログを表示
-                    final shouldReset = await showDialog<bool>(
-                      context: context,
-                      builder: (context) => AlertDialog(
-                        title: const Text('🔄 リセット確認'),
-                        content: const Text(
-                          '使用済みワード履歴をリセットしますか？\n\nこれにより、次回のゲームから全てのワードが再び表示されるようになります。',
-                        ),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.of(context).pop(false),
-                            child: const Text('キャンセル'),
-                          ),
-                          ElevatedButton(
-                            onPressed: () => Navigator.of(context).pop(true),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.red,
-                              foregroundColor: Colors.white,
-                            ),
-                            child: const Text('リセット'),
-                          ),
-                        ],
-                      ),
-                    );
-
-                    if (shouldReset == true) {
-                      // SharedPreferencesをクリア
-                      await WordDuplicationService.resetUsedWords();
-
-                      // 成功メッセージを表示
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Row(
-                              children: [
-                                Icon(Icons.check_circle, color: Colors.white),
-                                SizedBox(width: 8),
-                                Text('使用済みワード履歴をリセットしました'),
-                              ],
-                            ),
-                            backgroundColor: Colors.green,
-                            duration: Duration(seconds: 2),
-                          ),
-                        );
-                      }
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.grey.shade600,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 30,
-                      vertical: 12,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(25),
-                    ),
-                    elevation: 4,
-                    shadowColor: Colors.grey.withValues(alpha: 0.3),
-                  ),
-                  child: Text(
-                    '🔄 履歴リセット',
-                    style: TextStyle(
-                      fontSize: MediaQuery.of(context).size.width * 0.045,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
+                // 使用ワードのリセット機能：一旦、不要
+                // const SizedBox(height: 20),
+                // ElevatedButton(
+                //   onPressed: () async {
+                //     // 確認ダイアログを表示
+                //     final shouldReset = await showDialog<bool>(
+                //       context: context,
+                //       builder: (context) => AlertDialog(
+                //         title: const Text('🔄 リセット確認'),
+                //         content: const Text(
+                //           '使用済みワード履歴をリセットしますか？\n\nこれにより、次回のゲームから全てのワードが再び表示されるようになります。',
+                //         ),
+                //         actions: [
+                //           TextButton(
+                //             onPressed: () => Navigator.of(context).pop(false),
+                //             child: const Text('キャンセル'),
+                //           ),
+                //           ElevatedButton(
+                //             onPressed: () => Navigator.of(context).pop(true),
+                //             style: ElevatedButton.styleFrom(
+                //               backgroundColor: Colors.red,
+                //               foregroundColor: Colors.white,
+                //             ),
+                //             child: const Text('リセット'),
+                //           ),
+                //         ],
+                //       ),
+                //     );
+                //
+                //     if (shouldReset == true) {
+                //       // SharedPreferencesをクリア
+                //       await WordDuplicationService.resetUsedWords();
+                //
+                //       // 成功メッセージを表示
+                //       if (context.mounted) {
+                //         ScaffoldMessenger.of(context).showSnackBar(
+                //           const SnackBar(
+                //             content: Row(
+                //               children: [
+                //                 Icon(Icons.check_circle, color: Colors.white),
+                //                 SizedBox(width: 8),
+                //                 Text('使用済みワード履歴をリセットしました'),
+                //               ],
+                //             ),
+                //             backgroundColor: Colors.green,
+                //             duration: Duration(seconds: 2),
+                //           ),
+                //         );
+                //       }
+                //     }
+                //   },
+                //   style: ElevatedButton.styleFrom(
+                //     backgroundColor: Colors.grey.shade600,
+                //     foregroundColor: Colors.white,
+                //     padding: const EdgeInsets.symmetric(
+                //       horizontal: 30,
+                //       vertical: 12,
+                //     ),
+                //     shape: RoundedRectangleBorder(
+                //       borderRadius: BorderRadius.circular(25),
+                //     ),
+                //     elevation: 4,
+                //     shadowColor: Colors.grey.withValues(alpha: 0.3),
+                //   ),
+                //   child: Text(
+                //     '履歴リセット',
+                //     style: TextStyle(
+                //       fontSize: MediaQuery.of(context).size.width * 0.045,
+                //       fontWeight: FontWeight.w600,
+                //     ),
+                //   ),
+                // ),
               ],
             ),
           ),

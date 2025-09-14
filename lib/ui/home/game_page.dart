@@ -17,7 +17,7 @@ class GamePage extends ConsumerWidget {
       return Scaffold(
         backgroundColor: Colors.orange.shade50,
         appBar: AppBar(
-          title: const Text('🎮 カタカナハナシ'),
+          title: const Text('カタカナハナシ'),
           backgroundColor: Colors.orange,
           foregroundColor: Colors.white,
           elevation: 0,
@@ -73,7 +73,7 @@ class GamePage extends ConsumerWidget {
       return Scaffold(
         backgroundColor: Colors.orange.shade50,
         appBar: AppBar(
-          title: const Text('🎮 カタカナハナシ'),
+          title: const Text('カタカナハナシ'),
           backgroundColor: Colors.orange,
         ),
         body: const Center(
@@ -94,7 +94,7 @@ class GamePage extends ConsumerWidget {
     return Scaffold(
       backgroundColor: Colors.orange.shade50,
       appBar: AppBar(
-        title: const Text('🎮 カタカナハナシ'),
+        title: const Text('カタカナハナシ'),
         backgroundColor: Colors.orange,
         foregroundColor: Colors.white,
         elevation: 0,
@@ -235,7 +235,7 @@ class GamePage extends ConsumerWidget {
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
-                      'カタカナ語を使わずに説明してください！',
+                      'カタカナを使わずに説明してください！',
                       style: TextStyle(
                         fontSize: MediaQuery.of(context).size.width * 0.045,
                         color: Colors.orange.shade800,
