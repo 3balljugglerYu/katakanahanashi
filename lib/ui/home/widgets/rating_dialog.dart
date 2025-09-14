@@ -9,11 +9,7 @@ class RatingDialog extends HookConsumerWidget {
   final KatakanaWord word;
   final Function(SimpleRating) onSubmit;
 
-  const RatingDialog({
-    super.key,
-    required this.word,
-    required this.onSubmit,
-  });
+  const RatingDialog({super.key, required this.word, required this.onSubmit});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -21,9 +17,7 @@ class RatingDialog extends HookConsumerWidget {
     final selectedGoodBad = useState<bool?>(null);
 
     return AlertDialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       title: Row(
         children: [
           const Text('⭐', style: TextStyle(fontSize: 24)),
@@ -54,47 +48,53 @@ class RatingDialog extends HookConsumerWidget {
             ),
           ),
           const SizedBox(height: 12),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          Column(
             children: Difficulty.values.map((difficulty) {
               final isSelected = selectedDifficulty.value == difficulty;
-              return GestureDetector(
-                onTap: () => selectedDifficulty.value = difficulty,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
-                  ),
-                  decoration: BoxDecoration(
-                    color: isSelected 
-                        ? Colors.orange 
-                        : Colors.orange.shade50,
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: Colors.orange.shade300,
-                      width: isSelected ? 2 : 1,
-                    ),
-                  ),
-                  child: Text(
-                    difficulty.displayName,
-                    style: TextStyle(
-                      color: isSelected 
-                          ? Colors.white 
-                          : Colors.orange.shade800,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 14,
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: GestureDetector(
+                    onTap: () => selectedDifficulty.value = difficulty,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
+                      decoration: BoxDecoration(
+                        color: isSelected
+                            ? Colors.orange
+                            : Colors.orange.shade50,
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: Colors.orange.shade300,
+                          width: isSelected ? 2 : 1,
+                        ),
+                      ),
+                      child: Text(
+                        difficulty.displayName,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: isSelected
+                              ? Colors.white
+                              : Colors.orange.shade800,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14,
+                        ),
+                      ),
                     ),
                   ),
                 ),
               );
             }).toList(),
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           // Good/Bad評価
           Text(
-            '👍 この問題はどうでしたか？',
+            '👍 良いお題でしたか？',
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
@@ -107,7 +107,7 @@ class RatingDialog extends HookConsumerWidget {
             children: [
               // Goodボタン
               GestureDetector(
-                onTap: () => selectedGoodBad.value = 
+                onTap: () => selectedGoodBad.value =
                     selectedGoodBad.value == true ? null : true,
                 child: Container(
                   padding: const EdgeInsets.symmetric(
@@ -115,8 +115,8 @@ class RatingDialog extends HookConsumerWidget {
                     vertical: 10,
                   ),
                   decoration: BoxDecoration(
-                    color: selectedGoodBad.value == true 
-                        ? Colors.green 
+                    color: selectedGoodBad.value == true
+                        ? Colors.green
                         : Colors.green.shade50,
                     borderRadius: BorderRadius.circular(25),
                     border: Border.all(
@@ -130,10 +130,10 @@ class RatingDialog extends HookConsumerWidget {
                       const Text('👍', style: TextStyle(fontSize: 18)),
                       const SizedBox(width: 6),
                       Text(
-                        'グッド',
+                        'Good!',
                         style: TextStyle(
-                          color: selectedGoodBad.value == true 
-                              ? Colors.white 
+                          color: selectedGoodBad.value == true
+                              ? Colors.white
                               : Colors.green.shade800,
                           fontWeight: FontWeight.w600,
                         ),
@@ -142,10 +142,10 @@ class RatingDialog extends HookConsumerWidget {
                   ),
                 ),
               ),
-              
+
               // Badボタン
               GestureDetector(
-                onTap: () => selectedGoodBad.value = 
+                onTap: () => selectedGoodBad.value =
                     selectedGoodBad.value == false ? null : false,
                 child: Container(
                   padding: const EdgeInsets.symmetric(
@@ -153,8 +153,8 @@ class RatingDialog extends HookConsumerWidget {
                     vertical: 10,
                   ),
                   decoration: BoxDecoration(
-                    color: selectedGoodBad.value == false 
-                        ? Colors.red 
+                    color: selectedGoodBad.value == false
+                        ? Colors.red
                         : Colors.red.shade50,
                     borderRadius: BorderRadius.circular(25),
                     border: Border.all(
@@ -168,10 +168,10 @@ class RatingDialog extends HookConsumerWidget {
                       const Text('👎', style: TextStyle(fontSize: 18)),
                       const SizedBox(width: 6),
                       Text(
-                        'バッド',
+                        'Bad!',
                         style: TextStyle(
-                          color: selectedGoodBad.value == false 
-                              ? Colors.white 
+                          color: selectedGoodBad.value == false
+                              ? Colors.white
                               : Colors.red.shade800,
                           fontWeight: FontWeight.w600,
                         ),
@@ -182,14 +182,11 @@ class RatingDialog extends HookConsumerWidget {
               ),
             ],
           ),
-          
+
           const SizedBox(height: 16),
           Text(
             '※ 難易度は必須、Good/Badは任意です',
-            style: TextStyle(
-              fontSize: 12,
-              color: Colors.grey.shade600,
-            ),
+            style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
           ),
         ],
       ),
@@ -197,25 +194,24 @@ class RatingDialog extends HookConsumerWidget {
         // キャンセルボタン
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: Text(
-            'キャンセル',
-            style: TextStyle(color: Colors.grey.shade600),
-          ),
+          child: Text('キャンセル', style: TextStyle(color: Colors.grey.shade600)),
         ),
-        
+
         // 送信ボタン
         ElevatedButton(
-          onPressed: selectedDifficulty.value == null ? null : () {
-            final rating = SimpleRating(
-              wordId: word.id ?? 'local_${word.word}', // ローカル用の仮ID
-              difficulty: selectedDifficulty.value!,
-              isGood: selectedGoodBad.value == true,
-              isBad: selectedGoodBad.value == false,
-            );
-            
-            onSubmit(rating);
-            Navigator.of(context).pop();
-          },
+          onPressed: selectedDifficulty.value == null
+              ? null
+              : () {
+                  final rating = SimpleRating(
+                    wordId: word.id ?? 'local_${word.word}', // ローカル用の仮ID
+                    difficulty: selectedDifficulty.value!,
+                    isGood: selectedGoodBad.value == true,
+                    isBad: selectedGoodBad.value == false,
+                  );
+
+                  onSubmit(rating);
+                  Navigator.of(context).pop();
+                },
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.orange,
             foregroundColor: Colors.white,
