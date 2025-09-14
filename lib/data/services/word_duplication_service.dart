@@ -1,0 +1,116 @@
+import 'package:shared_preferences/shared_preferences.dart';
+
+/// ワード重複防止サービス
+/// データベースから取得したワードのみ重複防止を適用
+class WordDuplicationService {
+  static const String _usedWordIdsKey = 'used_word_ids';
+  static const String _totalDbWordsKey = 'total_db_words_count';
+  static const int _minWordsThreshold = 9; // 最小ワード数閾値（ゲーム終了時）
+  
+  /// 使用済みワードIDを保存
+  static Future<void> markWordAsUsed(String wordId) async {
+    final prefs = await SharedPreferences.getInstance();
+    final usedWords = prefs.getStringList(_usedWordIdsKey) ?? [];
+    
+    // 重複チェック
+    if (!usedWords.contains(wordId)) {
+      usedWords.add(wordId);
+      await prefs.setStringList(_usedWordIdsKey, usedWords);
+      print('WordDuplicationService - Marked word as used: $wordId');
+    }
+  }
+  
+  /// 使用済みワードID一覧を取得
+  static Future<List<String>> getUsedWordIds() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getStringList(_usedWordIdsKey) ?? [];
+  }
+  
+  /// データベースの総ワード数を保存
+  static Future<void> setTotalDbWordsCount(int count) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(_totalDbWordsKey, count);
+    print('WordDuplicationService - Set total DB words count: $count');
+  }
+  
+  /// データベースの総ワード数を取得
+  static Future<int> getTotalDbWordsCount() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getInt(_totalDbWordsKey) ?? 0;
+  }
+  
+  /// 残りワード数を取得
+  static Future<int> getRemainingWordsCount() async {
+    final totalCount = await getTotalDbWordsCount();
+    final usedCount = await getUsedWordIds().then((list) => list.length);
+    return totalCount - usedCount;
+  }
+  
+  /// 全ワード使用済みかチェック
+  static Future<bool> areAllDbWordsUsed() async {
+    final usedCount = await getUsedWordIds().then((list) => list.length);
+    final totalCount = await getTotalDbWordsCount();
+    
+    print('WordDuplicationService - Used: $usedCount, Total: $totalCount');
+    return totalCount > 0 && usedCount >= totalCount;
+  }
+  
+  /// 使用済みワード情報をリセット
+  static Future<void> resetUsedWords() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_usedWordIdsKey);
+    print('WordDuplicationService - Reset used words');
+  }
+  
+  /// ゲーム終了時のリセット判定
+  static Future<bool> shouldResetAfterGame() async {
+    final remainingWords = await getRemainingWordsCount();
+    final shouldReset = remainingWords <= _minWordsThreshold;
+    
+    if (shouldReset) {
+      print('WordDuplicationService - Remaining words ($remainingWords) <= $_minWordsThreshold, will reset after game');
+    }
+    
+    return shouldReset;
+  }
+  
+  /// データベースワードかどうか判定
+  static bool isDatabaseWord(String? wordId) {
+    return wordId != null && !wordId.startsWith('local_');
+  }
+  
+  /// 使用可能なワードをフィルタリング
+  static Future<List<T>> filterAvailableWords<T>(
+    List<T> words,
+    String Function(T) getId,
+  ) async {
+    // データベースワードのみ重複防止を適用
+    final dbWords = words.where((word) => isDatabaseWord(getId(word))).toList();
+    final localWords = words.where((word) => !isDatabaseWord(getId(word))).toList();
+    
+    if (dbWords.isEmpty) {
+      // データベースワードがない場合は全ワードを返す
+      return words;
+    }
+    
+    final usedWordIds = await getUsedWordIds();
+    final availableDbWords = dbWords.where((word) => 
+      !usedWordIds.contains(getId(word))
+    ).toList();
+    
+    // データベースワードが全て使用済みの場合はリセット
+    if (availableDbWords.isEmpty && dbWords.isNotEmpty) {
+      await resetUsedWords();
+      return words; // リセット後は全ワードを返す
+    }
+    
+    // 使用可能なデータベースワードが十分でない場合は、使用済みワードも含めて返す
+    if (availableDbWords.length < 10) {
+      print('WordDuplicationService - Not enough available words (${availableDbWords.length}), including used words');
+      return words; // 全ワードを返す（重複防止を一時的に無効化）
+    }
+    
+    // ローカルワード + 使用可能なデータベースワード
+    return [...localWords, ...availableDbWords];
+  }
+}

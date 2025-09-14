@@ -318,7 +318,7 @@ class GamePage extends ConsumerWidget {
       // これにより最後のワードがSharedPreferencesに登録される
       gameViewModel.nextQuestion();
       
-      // ゲーム終了後のリセット判定と実行（非同期で実行）
+      // ゲーム終了後のリセット判定と実行
       gameViewModel.checkAndResetIfNeeded().then((wasReset) {
         if (wasReset) {
           print("GameViewModel - Reset executed after game completion");

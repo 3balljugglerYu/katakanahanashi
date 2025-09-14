@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../../navigator/app_router.dart';
 import '../../data/services/word_duplication_service.dart';
-import 'game_view_model.dart';
 
 class StartPage extends ConsumerWidget {
   const StartPage({super.key});
@@ -47,11 +46,6 @@ class StartPage extends ConsumerWidget {
             const SizedBox(height: 60),
             ElevatedButton(
               onPressed: () {
-                // GameViewModelをリセットしてから新しいゲームを開始
-                final gameViewModel = ref.read(gameViewModelProvider.notifier);
-                gameViewModel.resetGame();
-                print('StartPage - Reset GameViewModel and starting new game');
-                
                 Navigator.pushNamed(context, AppRouter.gameRoute);
               },
               style: ElevatedButton.styleFrom(

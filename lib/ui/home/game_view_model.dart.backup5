@@ -46,12 +46,7 @@ class GameViewModel extends StateNotifier<GameState> {
   }
 
   void _initializeGame() async {
-    // ゲーム開始時に必ずcurrentQuestionIndexを0にリセット
-    state = state.copyWith(
-      isLoading: true, 
-      errorMessage: null, 
-      currentQuestionIndex: 0
-    );
+    state = state.copyWith(isLoading: true, errorMessage: null, currentQuestionIndex: 0);
     
     try {
       // Supabaseからワードを取得
@@ -92,8 +87,6 @@ class GameViewModel extends StateNotifier<GameState> {
       isLoading: false,
       currentQuestionIndex: 0, // 確実に0から開始
     );
-    
-    print('GameViewModel - New game started with ${shuffled.take(state.totalQuestions).length} words, currentQuestionIndex: 0');
   }
   
   void _useLocalWords() {
@@ -105,8 +98,6 @@ class GameViewModel extends StateNotifier<GameState> {
       isLoading: false,
       currentQuestionIndex: 0, // 確実に0から開始
     );
-    
-    print('GameViewModel - New game started with local words, currentQuestionIndex: 0');
   }
 
   void nextQuestion() {
@@ -123,7 +114,6 @@ class GameViewModel extends StateNotifier<GameState> {
       state = state.copyWith(
         currentQuestionIndex: nextIndex,
       );
-      print('GameViewModel - Moved to question ${nextIndex + 1}/${state.totalQuestions}');
     } else {
       // ゲームが終了した場合の処理
       print('Game completed. Question index would be $nextIndex but only have ${state.shuffledWords.length} words.');
@@ -163,18 +153,6 @@ class GameViewModel extends StateNotifier<GameState> {
       if (shouldReset) {
         print('WordDuplicationService - Executing reset after game completion');
         await WordDuplicationService.resetUsedWords();
-        
-        // リセット後の状況をログ出力
-        final totalDbWords = await WordDuplicationService.getTotalDbWordsCount();
-        final usedWords = await WordDuplicationService.getUsedWordIds();
-        final remainingWords = totalDbWords - usedWords.length;
-        
-        print('=== リセット後のワード状況 ===');
-        print('データベース総ワード数: $totalDbWords');
-        print('使用済みワード数: ${usedWords.length}');
-        print('残りの一意のワード数: $remainingWords');
-        print('===============================');
-        
         return true; // リセットが実行された
       }
       
