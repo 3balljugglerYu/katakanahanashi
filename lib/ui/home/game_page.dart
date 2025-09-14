@@ -32,10 +32,7 @@ class GamePage extends ConsumerWidget {
               const SizedBox(height: 16),
               Text(
                 'ゲームを準備中...',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.orange.shade700,
-                ),
+                style: TextStyle(fontSize: 16, color: Colors.orange.shade700),
               ),
               if (gameState.errorMessage != null) ...[
                 const SizedBox(height: 16),
@@ -71,7 +68,7 @@ class GamePage extends ConsumerWidget {
     }
 
     // 安全にcurrentWordを取得
-    if (gameState.shuffledWords.isEmpty || 
+    if (gameState.shuffledWords.isEmpty ||
         gameState.currentQuestionIndex >= gameState.shuffledWords.length) {
       return Scaffold(
         backgroundColor: Colors.orange.shade50,
@@ -91,7 +88,7 @@ class GamePage extends ConsumerWidget {
         ),
       );
     }
-    
+
     final currentWord = gameState.shuffledWords[gameState.currentQuestionIndex];
 
     return Scaffold(
@@ -266,65 +263,19 @@ class GamePage extends ConsumerWidget {
     );
   }
 
-  void _showErrorSnackBar(BuildContext context, SubmissionResult result) {
-    IconData icon;
-    Color backgroundColor;
-    String actionText = '';
-    
-    switch (result.errorType) {
-      case SubmissionErrorType.network:
-        icon = Icons.wifi_off;
-        backgroundColor = Colors.orange;
-        actionText = result.isRetryable ? ' (タップして再試行)' : '';
-        break;
-      case SubmissionErrorType.database:
-        icon = Icons.storage;
-        backgroundColor = Colors.red;
-        actionText = result.isRetryable ? ' (タップして再試行)' : '';
-        break;
-      default:
-        icon = Icons.error;
-        backgroundColor = Colors.red;
-        break;
-    }
-    
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            Icon(icon, color: Colors.white),
-            const SizedBox(width: 8),
-            Expanded(child: Text('${result.message}$actionText')),
-          ],
-        ),
-        backgroundColor: backgroundColor,
-        duration: const Duration(seconds: 4),
-        action: result.isRetryable
-            ? SnackBarAction(
-                label: '再試行',
-                textColor: Colors.white,
-                onPressed: () {
-                  // 再試行処理は必要に応じて実装
-                },
-              )
-            : null,
-      ),
-    );
-  }
-  
   void _proceedToNext(BuildContext context, GameViewModel gameViewModel) {
     if (gameViewModel.isLastQuestion) {
       // 最後の問題の場合は、nextQuestion()を呼び出してからトップ画面に戻る
       // これにより最後のワードがSharedPreferencesに登録される
       gameViewModel.nextQuestion();
-      
+
       // ゲーム終了後のリセット判定と実行（非同期で実行）
       gameViewModel.checkAndResetIfNeeded().then((wasReset) {
         if (wasReset) {
           print("GameViewModel - Reset executed after game completion");
         }
       });
-      
+
       if (context.mounted) {
         Navigator.pushNamedAndRemoveUntil(
           context,
@@ -337,9 +288,13 @@ class GamePage extends ConsumerWidget {
     }
   }
 
-  void _handleNext(BuildContext context, WidgetRef ref, GameViewModel gameViewModel) {
+  void _handleNext(
+    BuildContext context,
+    WidgetRef ref,
+    GameViewModel gameViewModel,
+  ) {
     final currentWord = gameViewModel.currentWord;
-    
+
     // 評価ダイアログを表示
     showDialog<void>(
       context: context,
@@ -367,38 +322,16 @@ class GamePage extends ConsumerWidget {
               ),
             ),
           );
-          
+
           // 評価を送信
           final result = await gameViewModel.submitRating(rating);
-          
+
           // ローディングダイアログを閉じる
           if (context.mounted) {
             Navigator.of(context).pop();
           }
-          
-          // 結果に応じたフィードバック
-          if (context.mounted) {
-            if (result.isSuccess) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Row(
-                    children: [
-                      const Icon(Icons.check_circle, color: Colors.white),
-                      const SizedBox(width: 8),
-                      Expanded(child: Text(result.message)),
-                    ],
-                  ),
-                  backgroundColor: Colors.green,
-                  duration: const Duration(seconds: 2),
-                ),
-              );
-            } else {
-              // エラーの種類に応じた処理
-              _showErrorSnackBar(context, result);
-            }
-          }
-          
-          // 次の処理（エラーが発生してもゲームは続行）
+
+          // 次の処理（静かに次に進む）
           _proceedToNext(context, gameViewModel);
         },
       ),
@@ -411,10 +344,7 @@ class _NextButton extends StatelessWidget {
   final bool isLastQuestion;
   final VoidCallback onPressed;
 
-  const _NextButton({
-    required this.isLastQuestion,
-    required this.onPressed,
-  });
+  const _NextButton({required this.isLastQuestion, required this.onPressed});
 
   @override
   Widget build(BuildContext context) {
@@ -426,9 +356,7 @@ class _NextButton extends StatelessWidget {
         padding: EdgeInsets.symmetric(
           vertical: MediaQuery.of(context).size.height * 0.022,
         ),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(30),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
         elevation: 8,
         shadowColor: isLastQuestion
             ? Colors.red.withValues(alpha: 0.4)
