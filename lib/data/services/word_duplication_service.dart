@@ -100,13 +100,15 @@ class WordDuplicationService {
     
     // データベースワードが全て使用済みの場合はリセット
     if (availableDbWords.isEmpty && dbWords.isNotEmpty) {
+      print('WordDuplicationService - All database words used, resetting and returning all words');
       await resetUsedWords();
       return words; // リセット後は全ワードを返す
     }
     
     // 使用可能なデータベースワードが十分でない場合は、使用済みワードも含めて返す
+    // これにより、ゲーム中にアプリを再起動しても問題なくゲームを継続できる
     if (availableDbWords.length < 10) {
-      print('WordDuplicationService - Not enough available words (${availableDbWords.length}), including used words');
+      print('WordDuplicationService - Not enough available words (${availableDbWords.length}), including used words for game continuity');
       return words; // 全ワードを返す（重複防止を一時的に無効化）
     }
     
