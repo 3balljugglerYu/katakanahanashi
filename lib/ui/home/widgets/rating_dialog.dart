@@ -220,7 +220,7 @@ class RatingDialog extends HookConsumerWidget {
             ),
           ),
           child: const Text(
-            '送信',
+            '決定',
             style: TextStyle(fontWeight: FontWeight.bold),
           ),
         ),

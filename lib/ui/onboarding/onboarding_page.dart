@@ -72,29 +72,40 @@ class OnboardingPage extends ConsumerWidget {
       // 1ページ目: アプリの紹介
       PageViewModel(
         title: "カタカナハナシへ\nようこそ！",
-        body: "カタカナを使わずに説明して当て合う、ことば遊びゲームです！\n遊びながら日本語の言い換え力を鍛えよう！",
-        image: _buildImageWidget(context, semanticsLabel: "カタカナハナシのアプリアイコン"),
+        body:
+            "カタカナ禁止のことば遊びゲームです。\n\n遊びながら日本語の言い換え力を鍛えましょう！",
+        image: _buildImageWidget(
+          context,
+          imagePath: 'assets/images/tutorial_1.png',
+          semanticsLabel: "カタカナ禁止ルールの説明イラスト",
+        ),
         decoration: _buildPageDecoration(context),
       ),
 
       // 2ページ目: ゲームの遊び方
       PageViewModel(
-        title: "ルール\n『カタカナは使わない』",
+        title: "ルールは『カタカナ禁止』",
         body:
-            "お題をカタカナを一切使わずに説明してください。\n"
-            "『コンピューター』→「計算をする電子の機械」",
-        image: _buildImageWidget(context, semanticsLabel: "カタカナ禁止ルールの説明イラスト"),
+        "出題者が「お題」を確認し、カタカナを使わずに説明しましょう。\n\n"
+            "『パン』→「小麦で作られた主食の...」\n\n"
+            "回答者が正解したら[次へ]をタップ！",
+        image: _buildImageWidget(
+          context,
+          imagePath: 'assets/images/tutorial_2.png',
+          semanticsLabel: "カタカナ禁止ルールの説明イラスト",
+        ),
         decoration: _buildPageDecoration(context),
       ),
 
       // 3ページ目: 楽しみ方
       PageViewModel(
-        title: "聞いて想像し、\nズバリ当てよう！",
+        title: "評価して次の「お題」へ！",
         body:
-            "説明を手がかりに、思い浮かんだ答えを言いましょう！正解したら次へ！\n"
-            "※1セット10個のお題が表示されます。\n",
+            "評価をつけて、[決定]をタップすると次のお題に進みます！\n"
+            "評価は、このアプリをより良くする為に利用させて頂きます。",
         image: _buildImageWidget(
           context,
+          imagePath: 'assets/images/tutorial_3.png',
           semanticsLabel: "説明を聞いて答えを当てる場面のイラスト",
         ),
         decoration: _buildPageDecoration(context),
@@ -102,12 +113,12 @@ class OnboardingPage extends ConsumerWidget {
 
       // 4ページ目: 楽しみ方
       PageViewModel(
-        title: "みんなで遊んで、\nそして、難易度を評価！",
+        title: "待ち時間に最適 ♪",
         body:
-            "家族や友だちとプレイして、楽しもう！\n"
-            "お題終了後に難しさを評価してください。今後のゲームバランス調整に役立ちます。",
+            "ドライブやお散歩、ちょっとした待ち時間などに、遊んでみて下さいね！\n\nきっと盛り上がりますよ♪",
         image: _buildImageWidget(
           context,
+          imagePath: 'assets/images/tutorial_4.png',
           semanticsLabel: "複数人で遊び、難易度を評価するイラスト",
         ),
         decoration: _buildPageDecoration(context),
@@ -118,52 +129,74 @@ class OnboardingPage extends ConsumerWidget {
   /// 画像ウィジェットを作成
   Widget _buildImageWidget(
     BuildContext context, {
+    String? imagePath,
     required String semanticsLabel,
   }) {
     final screenWidth = MediaQuery.of(context).size.width;
-    final imageSize = screenWidth * 0.4; // 画面幅の40%
+
+    // デバイスサイズに応じた動的調整
+    double imageRatio;
+    if (screenWidth > 600) {
+      // タブレット: 30%
+      imageRatio = 0.6;
+    } else if (screenWidth > 400) {
+      // 大きめのスマホ: 35%
+      imageRatio = 0.65;
+    } else {
+      // 小さめのスマホ: 40%
+      imageRatio = 0.70;
+    }
+
+    final imageWidth = screenWidth * imageRatio;
 
     return Semantics(
       label: semanticsLabel,
-      child: Container(
-        width: imageSize,
-        height: imageSize,
-        margin: const EdgeInsets.symmetric(vertical: 32),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(24),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.orange.withValues(alpha: 0.3),
-              blurRadius: 12,
-              offset: const Offset(0, 6),
+      child: Column(
+        children: [
+          const SizedBox(height: 100),
+          Align(
+            alignment: Alignment.topCenter,
+            child: Container(
+              width: imageWidth,
+              // 高さは親（IntroductionScreenのimageFlex）に委ねる
+              margin: EdgeInsets.zero,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(24),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.orange.withValues(alpha: 0.3),
+                    blurRadius: 12,
+                    offset: const Offset(0, 6),
+                  ),
+                ],
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(24),
+                child: Image.asset(
+                  imagePath ?? 'assets/icon/app_icon.png',
+                  width: imageWidth,
+                  // 高さは制約に合わせて自動調整
+                  fit: BoxFit.contain,
+                  errorBuilder: (context, error, stackTrace) {
+                    // 画像が読み込めない場合のフォールバック
+                    return Container(
+                      width: imageWidth,
+                      decoration: BoxDecoration(
+                        color: Colors.orange.shade100,
+                        borderRadius: BorderRadius.circular(24),
+                      ),
+                      child: Icon(
+                        Icons.games,
+                        size: imageWidth * 0.5,
+                        color: Colors.orange,
+                      ),
+                    );
+                  },
+                ),
+              ),
             ),
-          ],
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(24),
-          child: Image.asset(
-            'assets/icon/app_icon.png',
-            width: imageSize,
-            height: imageSize,
-            fit: BoxFit.contain,
-            errorBuilder: (context, error, stackTrace) {
-              // 画像が読み込めない場合のフォールバック
-              return Container(
-                width: imageSize,
-                height: imageSize,
-                decoration: BoxDecoration(
-                  color: Colors.orange.shade100,
-                  borderRadius: BorderRadius.circular(24),
-                ),
-                child: Icon(
-                  Icons.games,
-                  size: imageSize * 0.5,
-                  color: Colors.orange,
-                ),
-              );
-            },
           ),
-        ),
+        ],
       ),
     );
   }
@@ -181,16 +214,21 @@ class OnboardingPage extends ConsumerWidget {
       ),
       bodyTextStyle: TextStyle(
         fontSize: screenWidth * 0.045,
-        color: Colors.orange.shade700,
+        fontWeight: FontWeight.bold,
+        color: Colors.orange.shade500,
         height: 1.6,
       ),
+      // 画面全体を使用し、image領域がflexで60%程度になるよう調整
+      fullScreen: true,
+      imageFlex: 6,
+      bodyFlex: 4,
       contentMargin: EdgeInsets.symmetric(
         horizontal: screenWidth * 0.08,
-        vertical: 24,
+        vertical: 12,
       ),
       imagePadding: EdgeInsets.symmetric(
         horizontal: screenWidth * 0.1,
-        vertical: 32,
+        vertical: 0,
       ),
     );
   }
