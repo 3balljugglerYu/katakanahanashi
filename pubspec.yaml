@@ -68,6 +68,9 @@ dependencies:
   
   # Particles animation
   particles_flutter: ^1.0.1
+  
+  # Onboarding screen
+  introduction_screen: ^4.0.0
 
 dev_dependencies:
   flutter_test:
@@ -106,6 +109,10 @@ flutter:
   assets:
     - .env
     - assets/icon/app_icon.png
+    - assets/images/tutorial_1.png
+    - assets/images/tutorial_2.png
+    - assets/images/tutorial_3.png
+    - assets/images/tutorial_4.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

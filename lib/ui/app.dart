@@ -12,7 +12,7 @@ class KatakanaNashiApp extends ConsumerWidget {
       title: 'カタカナハナシ',
       theme: AppTheme.lightTheme,
       onGenerateRoute: AppRouter.generateRoute,
-      initialRoute: AppRouter.startRoute,
+      initialRoute: AppRouter.splashRoute,
     );
   }
 }

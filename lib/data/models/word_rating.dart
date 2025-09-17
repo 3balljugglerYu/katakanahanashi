@@ -42,11 +42,11 @@ extension DifficultyExtension on Difficulty {
   String get displayName {
     switch (this) {
       case Difficulty.easy:
-        return '簡単';
+        return 'かんたん';
       case Difficulty.normal:
-        return '普通';
+        return 'ふつう';
       case Difficulty.hard:
-        return '難しい';
+        return 'むつかしい';
     }
   }
 }
