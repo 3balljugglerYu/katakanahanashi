@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
@@ -9,9 +10,23 @@ import 'widgets/completion_dialog.dart';
 class GamePage extends ConsumerWidget {
   const GamePage({super.key});
 
-  // 本番用: 'ca-app-pub-2716829166250639/9936269880'
-  // テスト用: 'ca-app-pub-3940256099942544/4411468910'
-  static const String _interstitialAdUnitId = 'ca-app-pub-3940256099942544/4411468910';
+  // プラットフォーム別の広告ユニットIDを取得
+  static String get _interstitialAdUnitId {
+    if (Platform.isIOS) {
+      // iOS
+      // テスト用: 'ca-app-pub-3940256099942544/4411468910'
+      // 本番用: 'ca-app-pub-2716829166250639/9936269880'
+      return 'ca-app-pub-3940256099942544/4411468910';
+    } else if (Platform.isAndroid) {
+      // Android
+      // テスト用: 'ca-app-pub-3940256099942544/1033173712'
+      // 本番用: 'ca-app-pub-2716829166250639/3387528627'
+      return 'ca-app-pub-3940256099942544/1033173712';
+    } else {
+      // その他のプラットフォーム（テスト用）
+      return 'ca-app-pub-3940256099942544/4411468910';
+    }
+  }
   
   // 事前読み込み用の広告インスタンス
   static InterstitialAd? _preloadedAd;

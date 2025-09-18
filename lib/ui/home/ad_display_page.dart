@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import '../../navigator/app_router.dart';
@@ -11,9 +12,23 @@ class AdDisplayPage extends StatefulWidget {
 }
 
 class _AdDisplayPageState extends State<AdDisplayPage> with TickerProviderStateMixin {
-  // テスト用: 'ca-app-pub-3940256099942544/4411468910'
-  // 本番用: 'ca-app-pub-2716829166250639/9936269880'
-  static const String _interstitialAdUnitId = 'ca-app-pub-3940256099942544/4411468910';
+  // プラットフォーム別の広告ユニットIDを取得
+  static String get _interstitialAdUnitId {
+    if (Platform.isIOS) {
+      // iOS
+      // テスト用: 'ca-app-pub-3940256099942544/4411468910'
+      // 本番用: 'ca-app-pub-2716829166250639/9936269880'
+      return 'ca-app-pub-3940256099942544/4411468910';
+    } else if (Platform.isAndroid) {
+      // Android
+      // テスト用: 'ca-app-pub-3940256099942544/1033173712'
+      // 本番用: 'ca-app-pub-2716829166250639/3387528627'
+      return 'ca-app-pub-3940256099942544/1033173712';
+    } else {
+      // その他のプラットフォーム（テスト用）
+      return 'ca-app-pub-3940256099942544/4411468910';
+    }
+  }
   
   InterstitialAd? _interstitialAd;
   bool _adLoaded = false;
