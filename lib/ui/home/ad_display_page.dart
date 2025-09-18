@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import '../../navigator/app_router.dart';
+import 'game_page.dart';
 
 class AdDisplayPage extends StatefulWidget {
   const AdDisplayPage({super.key});
@@ -9,21 +10,60 @@ class AdDisplayPage extends StatefulWidget {
   State<AdDisplayPage> createState() => _AdDisplayPageState();
 }
 
-class _AdDisplayPageState extends State<AdDisplayPage> {
+class _AdDisplayPageState extends State<AdDisplayPage> with TickerProviderStateMixin {
   // テスト用: 'ca-app-pub-3940256099942544/4411468910'
   // 本番用: 'ca-app-pub-2716829166250639/9936269880'
   static const String _interstitialAdUnitId = 'ca-app-pub-3940256099942544/4411468910';
   
   InterstitialAd? _interstitialAd;
   bool _adLoaded = false;
+  bool _showCloseButton = false;
+  
+  late AnimationController _slideController;
+  late Animation<Offset> _slideAnimation;
 
   @override
   void initState() {
     super.initState();
+    
+    // スライドアニメーションの初期化
+    _slideController = AnimationController(
+      duration: const Duration(milliseconds: 400),
+      vsync: this,
+    );
+    _slideAnimation = Tween<Offset>(
+      begin: const Offset(0.0, 1.0), // 下から開始
+      end: const Offset(0.0, 0.0),   // 通常位置まで
+    ).animate(CurvedAnimation(
+      parent: _slideController,
+      curve: Curves.easeInOut,
+    ));
+    
     _loadInterstitialAd();
+    
+    // 画面表示後、少し遅延してからスライドアニメーション開始
+    Future.delayed(const Duration(milliseconds: 300), () {
+      _slideController.forward();
+    });
+    
   }
 
   void _loadInterstitialAd() {
+    // まず事前読み込み済み広告があるかチェック
+    final preloadedAd = GamePage.getPreloadedAd();
+    if (preloadedAd != null) {
+      print('事前読み込み済み広告を使用します');
+      _interstitialAd = preloadedAd;
+      setState(() {
+        _adLoaded = true;
+      });
+      // 即座に表示
+      _showInterstitialAd();
+      return;
+    }
+    
+    // 事前読み込み済み広告がない場合は通常の読み込み
+    print('事前読み込み済み広告がないため、新しく読み込みます');
     InterstitialAd.load(
       adUnitId: _interstitialAdUnitId,
       request: const AdRequest(),
@@ -56,7 +96,21 @@ class _AdDisplayPageState extends State<AdDisplayPage> {
           print('広告が終了されました');
           ad.dispose();
           _interstitialAd = null;
-          // 広告終了後は何もしない（ユーザーが×ボタンを押すまで待つ）
+          // 広告終了後、逆アニメーション（黒→白）と×ボタン表示を並行処理
+          _slideController.reverse();
+          
+          // ×ボタンを即座に表示してからトップ画面に戻る
+          if (context.mounted) {
+            setState(() {
+              _showCloseButton = true;
+            });
+            // ×ボタン表示後、少し遅延してからトップ画面に戻る
+            Future.delayed(const Duration(milliseconds: 500), () {
+              if (context.mounted) {
+                _navigateToTop();
+              }
+            });
+          }
         },
         onAdFailedToShowFullScreenContent: (InterstitialAd ad, AdError error) {
           print('広告表示に失敗しました: ${error.message}');
@@ -81,6 +135,7 @@ class _AdDisplayPageState extends State<AdDisplayPage> {
 
   @override
   void dispose() {
+    _slideController.dispose();
     _interstitialAd?.dispose();
     super.dispose();
   }
@@ -89,11 +144,11 @@ class _AdDisplayPageState extends State<AdDisplayPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: SafeArea(
-        child: Stack(
-          children: [
-            // メイン画面（白い画面）
-            const Center(
+      body: Stack(
+        children: [
+          // 白い背景画面（常に表示）
+          SafeArea(
+            child: Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -102,8 +157,8 @@ class _AdDisplayPageState extends State<AdDisplayPage> {
                     size: 64,
                     color: Colors.grey,
                   ),
-                  SizedBox(height: 16),
-                  Text(
+                  const SizedBox(height: 16),
+                  const Text(
                     '広告表示中...',
                     style: TextStyle(
                       fontSize: 18,
@@ -113,24 +168,31 @@ class _AdDisplayPageState extends State<AdDisplayPage> {
                 ],
               ),
             ),
-            // 左上の×ボタン
+          ),
+          // 黒色スライドオーバーレイ（下から上へ）
+          SlideTransition(
+            position: _slideAnimation,
+            child: Container(
+              color: Colors.black,
+              width: double.infinity,
+              height: double.infinity,
+            ),
+          ),
+          // 左上の×ボタン（広告終了後に表示、シンプルなグレー）
+          if (_showCloseButton)
             Positioned(
-              top: 16,
+              top: MediaQuery.of(context).padding.top + 16,
               left: 16,
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: IconButton(
-                  icon: const Icon(Icons.close, color: Colors.black54),
-                  onPressed: _navigateToTop,
-                  tooltip: 'トップ画面に戻る',
+              child: GestureDetector(
+                onTap: _navigateToTop,
+                child: const Icon(
+                  Icons.close,
+                  color: Colors.white38,
+                  size: 32,
                 ),
               ),
             ),
-          ],
-        ),
+        ],
       ),
     );
   }

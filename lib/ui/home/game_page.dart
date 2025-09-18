@@ -12,6 +12,9 @@ class GamePage extends ConsumerWidget {
   // 本番用: 'ca-app-pub-2716829166250639/9936269880'
   // テスト用: 'ca-app-pub-3940256099942544/4411468910'
   static const String _interstitialAdUnitId = 'ca-app-pub-3940256099942544/4411468910';
+  
+  // 事前読み込み用の広告インスタンス
+  static InterstitialAd? _preloadedAd;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -273,11 +276,39 @@ class GamePage extends ConsumerWidget {
     // ゲーム終了処理を先に実行
     _proceedToGameEnd(gameViewModel);
     
+    // 広告の事前読み込みを開始
+    _preloadInterstitialAd();
+    
     showDialog<void>(
       context: context,
       barrierDismissible: false,
       builder: (context) => const CompletionDialog(),
     );
+  }
+  
+  static void _preloadInterstitialAd() {
+    print("広告の事前読み込みを開始します");
+    InterstitialAd.load(
+      adUnitId: _interstitialAdUnitId,
+      request: const AdRequest(),
+      adLoadCallback: InterstitialAdLoadCallback(
+        onAdLoaded: (InterstitialAd ad) {
+          print("広告の事前読み込みが完了しました");
+          _preloadedAd = ad;
+        },
+        onAdFailedToLoad: (LoadAdError error) {
+          print("広告の事前読み込みに失敗しました: ${error.message}");
+          _preloadedAd = null;
+        },
+      ),
+    );
+  }
+  
+  // 事前読み込み済み広告を取得するメソッド
+  static InterstitialAd? getPreloadedAd() {
+    final ad = _preloadedAd;
+    _preloadedAd = null; // 使用後はクリア
+    return ad;
   }
   
   void _proceedToGameEnd(GameViewModel gameViewModel) {
