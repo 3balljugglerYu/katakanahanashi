@@ -9,7 +9,11 @@ class RatingDialog extends HookConsumerWidget {
   final KatakanaWord word;
   final Function(SimpleRating) onSubmit;
 
-  const RatingDialog({super.key, required this.word, required this.onSubmit});
+  const RatingDialog({
+    super.key,
+    required this.word,
+    required this.onSubmit,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

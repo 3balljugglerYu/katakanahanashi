@@ -1,11 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import '../../navigator/app_router.dart';
 import 'game_view_model.dart';
 import 'widgets/rating_dialog.dart';
+import 'widgets/completion_dialog.dart';
 
 class GamePage extends ConsumerWidget {
   const GamePage({super.key});
+
+  // 本番用: 'ca-app-pub-2716829166250639/9936269880'
+  // テスト用: 'ca-app-pub-3940256099942544/4411468910'
+  static const String _interstitialAdUnitId = 'ca-app-pub-3940256099942544/4411468910';
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -263,7 +269,72 @@ class GamePage extends ConsumerWidget {
     );
   }
 
+  void _showCompletionDialog(BuildContext context, GameViewModel gameViewModel) {
+    // ゲーム終了処理を先に実行
+    _proceedToGameEnd(gameViewModel);
+    
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const CompletionDialog(),
+    );
+  }
+  
+  void _proceedToGameEnd(GameViewModel gameViewModel) {
+    // 最後の問題の場合は、nextQuestion()を呼び出す
+    // これにより最後のワードがSharedPreferencesに登録される
+    gameViewModel.nextQuestion();
+
+    // ゲーム終了後のリセット判定と実行（非同期で実行）
+    gameViewModel.checkAndResetIfNeeded().then((wasReset) {
+      if (wasReset) {
+        print("GameViewModel - Reset executed after game completion");
+      }
+    });
+  }
+
+  void _showInterstitialAd(BuildContext context, VoidCallback onAdClosed) {
+    InterstitialAd.load(
+      adUnitId: _interstitialAdUnitId,
+      request: const AdRequest(),
+      adLoadCallback: InterstitialAdLoadCallback(
+        onAdLoaded: (InterstitialAd ad) {
+          // 広告のコールバックを先に設定
+          ad.fullScreenContentCallback = FullScreenContentCallback(
+            onAdDismissedFullScreenContent: (InterstitialAd ad) {
+              print("広告が終了されました");
+              ad.dispose();
+              // 広告終了時はコールバックを呼ばない（既にトップ画面に遷移済み）
+            },
+            onAdFailedToShowFullScreenContent: (InterstitialAd ad, AdError error) {
+              print("広告表示に失敗しました: ${error.message}");
+              ad.dispose();
+              onAdClosed();
+            },
+            onAdShowedFullScreenContent: (InterstitialAd ad) {
+              print("広告が表示されました");
+              // 少し遅延してからトップ画面に遷移
+              Future.delayed(const Duration(milliseconds: 100), () {
+                onAdClosed();
+              });
+            },
+          );
+          // コールバック設定後に広告を表示
+          ad.show();
+        },
+        onAdFailedToLoad: (LoadAdError error) {
+          print("広告読み込みに失敗しました: ${error.message}");
+          // 広告読み込み失敗時はコールバックを実行
+          onAdClosed();
+        },
+      ),
+    );
+  }
+
   void _proceedToNext(BuildContext context, GameViewModel gameViewModel) {
+    print("_proceedToNext called. isLastQuestion: ${gameViewModel.isLastQuestion}");
+    
+    // 10問目の場合のみトップ画面に戻る
     if (gameViewModel.isLastQuestion) {
       // 最後の問題の場合は、nextQuestion()を呼び出してからトップ画面に戻る
       // これにより最後のワードがSharedPreferencesに登録される
@@ -277,13 +348,18 @@ class GamePage extends ConsumerWidget {
       });
 
       if (context.mounted) {
+        print("Navigating to start route");
         Navigator.pushNamedAndRemoveUntil(
           context,
           AppRouter.startRoute,
           (route) => false,
         );
+      } else {
+        print("Context not mounted, cannot navigate");
       }
     } else {
+      // 1〜9問目の場合は次の問題に進む
+      print("Moving to next question");
       gameViewModel.nextQuestion();
     }
   }
@@ -296,6 +372,9 @@ class GamePage extends ConsumerWidget {
     final currentWord = gameViewModel.currentWord;
 
     // 評価ダイアログを表示
+    final gameState = ref.read(gameViewModelProvider);
+    final isLastQuestion = gameState.currentQuestionIndex == 9;
+    
     showDialog<void>(
       context: context,
       barrierDismissible: false,
@@ -331,8 +410,12 @@ class GamePage extends ConsumerWidget {
             Navigator.of(context).pop();
           }
 
-          // 次の処理（静かに次に進む）
-          _proceedToNext(context, gameViewModel);
+          // 10問目の場合は完了ダイアログを表示
+          if (isLastQuestion) {
+            _showCompletionDialog(context, gameViewModel);
+          } else {
+            _proceedToNext(context, gameViewModel);
+          }
         },
       ),
     );
