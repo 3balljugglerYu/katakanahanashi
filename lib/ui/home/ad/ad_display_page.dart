@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -30,45 +31,53 @@ class _AdDisplayPageState extends State<AdDisplayPage> with TickerProviderStateM
       return 'ca-app-pub-3940256099942544/4411468910';
     }
   }
-  
+
   InterstitialAd? _interstitialAd;
   bool _adLoaded = false;
   bool _showCloseButton = false;
-  
+  Timer? _closeButtonTimer;
+
   late AnimationController _slideController;
   late Animation<Offset> _slideAnimation;
 
   @override
   void initState() {
     super.initState();
-    
     // スライドアニメーションの初期化
     _slideController = AnimationController(
       duration: const Duration(milliseconds: 400),
       vsync: this,
     );
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(0.0, 1.0), // 下から開始
-      end: const Offset(0.0, 0.0),   // 通常位置まで
-    ).animate(CurvedAnimation(
-      parent: _slideController,
-      curve: Curves.easeInOut,
-    ));
-    
+    _slideAnimation =
+        Tween<Offset>(
+          begin: const Offset(0.0, 1.0), // 下から開始
+          end: const Offset(0.0, 0.0), // 通常位置まで
+        ).animate(
+          CurvedAnimation(parent: _slideController, curve: Curves.easeInOut),
+        );
+
     _loadInterstitialAd();
-    
+
     // 画面表示後、少し遅延してからスライドアニメーション開始
     Future.delayed(const Duration(milliseconds: 300), () {
       _slideController.forward();
     });
-    
+
+    // ページ遷移から3秒後に×ボタンを表示できるよう準備
+    _closeButtonTimer = Timer(const Duration(seconds: 3), () {
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _showCloseButton = true;
+      });
+    });
   }
 
   void _loadInterstitialAd() {
     // まず事前読み込み済み広告があるかチェック
     final preloadedAd = GamePage.getPreloadedAd();
     if (preloadedAd != null) {
-      print('事前読み込み済み広告を使用します');
       _interstitialAd = preloadedAd;
       setState(() {
         _adLoaded = true;
@@ -77,25 +86,22 @@ class _AdDisplayPageState extends State<AdDisplayPage> with TickerProviderStateM
       _showInterstitialAd();
       return;
     }
-    
+
     // 事前読み込み済み広告がない場合は通常の読み込み
-    print('事前読み込み済み広告がないため、新しく読み込みます');
     InterstitialAd.load(
       adUnitId: _interstitialAdUnitId,
       request: const AdRequest(),
       adLoadCallback: InterstitialAdLoadCallback(
         onAdLoaded: (InterstitialAd ad) {
-          print('広告が読み込まれました');
           _interstitialAd = ad;
           setState(() {
             _adLoaded = true;
           });
-          
+
           // 広告読み込み完了後、自動で表示
           _showInterstitialAd();
         },
-        onAdFailedToLoad: (LoadAdError error) {
-          print('広告読み込みに失敗しました: ${error.message}');
+        onAdFailedToLoad: (LoadAdError _) {
           // 広告読み込み失敗時も画面は表示し続ける
           setState(() {
             _adLoaded = false;
@@ -106,39 +112,42 @@ class _AdDisplayPageState extends State<AdDisplayPage> with TickerProviderStateM
   }
 
   void _showInterstitialAd() {
-    if (_interstitialAd != null) {
-      _interstitialAd!.fullScreenContentCallback = FullScreenContentCallback(
-        onAdDismissedFullScreenContent: (InterstitialAd ad) {
-          print('広告が終了されました');
-          ad.dispose();
-          _interstitialAd = null;
-          // 広告終了後、逆アニメーション（黒→白）と×ボタン表示を並行処理
-          _slideController.reverse();
-          
-          // ×ボタンを即座に表示してからトップ画面に戻る
-          if (context.mounted) {
+    if (_interstitialAd == null) {
+      return;
+    }
+
+    final interstitial = _interstitialAd!;
+
+    interstitial.fullScreenContentCallback = FullScreenContentCallback(
+      onAdDismissedFullScreenContent: (InterstitialAd ad) {
+        ad.dispose();
+        _interstitialAd = null;
+        // 広告終了後、逆アニメーション（黒→白）と×ボタン表示を並行処理
+        _slideController.reverse();
+
+        _closeButtonTimer?.cancel();
+
+        // ×ボタンが表示されるようにしてからトップ画面に戻る
+        if (context.mounted) {
+          if (!_showCloseButton) {
             setState(() {
               _showCloseButton = true;
             });
-            // ×ボタン表示後、少し遅延してからトップ画面に戻る
-            Future.delayed(const Duration(milliseconds: 500), () {
-              if (context.mounted) {
-                _navigateToTop();
-              }
-            });
           }
-        },
-        onAdFailedToShowFullScreenContent: (InterstitialAd ad, AdError error) {
-          print('広告表示に失敗しました: ${error.message}');
-          ad.dispose();
-          _interstitialAd = null;
-        },
-        onAdShowedFullScreenContent: (InterstitialAd ad) {
-          print('広告が表示されました');
-        },
-      );
-      _interstitialAd!.show();
-    }
+          // ×ボタン表示後、少し遅延してからトップ画面に戻る
+          Future.delayed(const Duration(milliseconds: 500), () {
+            if (context.mounted) {
+              _navigateToTop();
+            }
+          });
+        }
+      },
+      onAdFailedToShowFullScreenContent: (InterstitialAd ad, AdError _) {
+        ad.dispose();
+        _interstitialAd = null;
+      },
+    );
+    interstitial.show();
   }
 
   void _navigateToTop() {
@@ -151,6 +160,7 @@ class _AdDisplayPageState extends State<AdDisplayPage> with TickerProviderStateM
 
   @override
   void dispose() {
+    _closeButtonTimer?.cancel();
     _slideController.dispose();
     _interstitialAd?.dispose();
     super.dispose();
