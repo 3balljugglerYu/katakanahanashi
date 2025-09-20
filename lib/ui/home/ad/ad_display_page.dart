@@ -1,8 +1,9 @@
 import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
-import '../../navigator/app_router.dart';
-import 'game_page.dart';
+import 'package:katakanahanashi/navigator/app_router.dart';
+import 'package:katakanahanashi/ui/home/game/game_page.dart';
 
 class AdDisplayPage extends StatefulWidget {
   const AdDisplayPage({super.key});

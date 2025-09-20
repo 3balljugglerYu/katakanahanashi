@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import '../../../domain/repository/katakana_word.dart';
-import '../../../data/models/simple_rating.dart';
-import '../../../data/models/word_rating.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+
+import 'package:katakanahanashi/data/models/simple_rating.dart';
+import 'package:katakanahanashi/data/models/word_rating.dart';
+import 'package:katakanahanashi/domain/repository/katakana_word.dart';
 
 class RatingDialog extends HookConsumerWidget {
   final KatakanaWord word;

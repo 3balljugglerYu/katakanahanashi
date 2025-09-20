@@ -1,10 +1,12 @@
 import 'dart:math';
+
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import '../../data/katakana_words.dart';
-import '../../data/repositories/word_rating_repository.dart';
-import '../../data/models/simple_rating.dart';
-import '../../data/services/word_duplication_service.dart';
-import '../../domain/repository/katakana_word.dart';
+import 'package:katakanahanashi/data/katakana_words.dart';
+import 'package:katakanahanashi/data/repositories/word_rating_repository.dart';
+import 'package:katakanahanashi/data/models/simple_rating.dart';
+import 'package:katakanahanashi/data/services/word_duplication_service.dart';
+import 'package:katakanahanashi/domain/repository/katakana_word.dart';
+
 import 'game_state.dart';
 
 // 評価送信結果クラス

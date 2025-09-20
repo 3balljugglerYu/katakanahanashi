@@ -1,5 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import '../../domain/repository/katakana_word.dart';
+
+import 'package:katakanahanashi/domain/repository/katakana_word.dart';
 
 part 'game_state.freezed.dart';
 

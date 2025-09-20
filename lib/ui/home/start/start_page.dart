@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import '../../navigator/app_router.dart';
-import '../onboarding/onboarding_page.dart';
-import 'game_view_model.dart';
-import 'widgets/particle_background.dart';
+
+import 'package:katakanahanashi/navigator/app_router.dart';
+import 'package:katakanahanashi/ui/home/game/game_view_model.dart';
+import 'package:katakanahanashi/ui/home/widgets/background/particle_background.dart';
+import 'package:katakanahanashi/ui/onboarding/onboarding_page.dart';
 
 class StartPage extends ConsumerWidget {
   const StartPage({super.key});

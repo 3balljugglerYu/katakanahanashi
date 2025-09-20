@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:introduction_screen/introduction_screen.dart';
-import '../home/start_page.dart';
+
+import 'package:katakanahanashi/ui/home/start/start_page.dart';
+
 import 'onboarding_view_model.dart';
 
 /// オンボーディング（チュートリアル）ページ

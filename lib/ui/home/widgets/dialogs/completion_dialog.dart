@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import '../ad_display_page.dart';
+
+import 'package:katakanahanashi/ui/home/ad/ad_display_page.dart';
 
 class CompletionDialog extends StatelessWidget {
   const CompletionDialog({super.key});
