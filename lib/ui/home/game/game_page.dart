@@ -29,7 +29,7 @@ class GamePage extends ConsumerWidget {
       return 'ca-app-pub-3940256099942544/4411468910';
     }
   }
-  
+
   // 事前読み込み用の広告インスタンス
   static InterstitialAd? _preloadedAd;
 
@@ -43,7 +43,7 @@ class GamePage extends ConsumerWidget {
       return Scaffold(
         backgroundColor: Colors.orange.shade50,
         appBar: AppBar(
-          title: const Text('カタカナハナシ'),
+          title: const Text('ことばかくれんぼ'),
           backgroundColor: Colors.orange,
           foregroundColor: Colors.white,
           elevation: 0,
@@ -99,7 +99,7 @@ class GamePage extends ConsumerWidget {
       return Scaffold(
         backgroundColor: Colors.orange.shade50,
         appBar: AppBar(
-          title: const Text('カタカナハナシ'),
+          title: const Text('ことばかくれんぼ'),
           backgroundColor: Colors.orange,
         ),
         body: const Center(
@@ -120,7 +120,7 @@ class GamePage extends ConsumerWidget {
     return Scaffold(
       backgroundColor: Colors.orange.shade50,
       appBar: AppBar(
-        title: const Text('カタカナハナシ'),
+        title: const Text('ことばかくれんぼ'),
         backgroundColor: Colors.orange,
         foregroundColor: Colors.white,
         elevation: 0,
@@ -289,20 +289,23 @@ class GamePage extends ConsumerWidget {
     );
   }
 
-  void _showCompletionDialog(BuildContext context, GameViewModel gameViewModel) {
+  void _showCompletionDialog(
+    BuildContext context,
+    GameViewModel gameViewModel,
+  ) {
     // ゲーム終了処理を先に実行
     _proceedToGameEnd(gameViewModel);
-    
+
     // 広告の事前読み込みを開始
     _preloadInterstitialAd();
-    
+
     showDialog<void>(
       context: context,
       barrierDismissible: false,
       builder: (context) => const CompletionDialog(),
     );
   }
-  
+
   static void _preloadInterstitialAd() {
     print("広告の事前読み込みを開始します");
     InterstitialAd.load(
@@ -320,14 +323,14 @@ class GamePage extends ConsumerWidget {
       ),
     );
   }
-  
+
   // 事前読み込み済み広告を取得するメソッド
   static InterstitialAd? getPreloadedAd() {
     final ad = _preloadedAd;
     _preloadedAd = null; // 使用後はクリア
     return ad;
   }
-  
+
   void _proceedToGameEnd(GameViewModel gameViewModel) {
     // 最後の問題の場合は、nextQuestion()を呼び出す
     // これにより最後のワードがSharedPreferencesに登録される
@@ -354,11 +357,12 @@ class GamePage extends ConsumerWidget {
               ad.dispose();
               // 広告終了時はコールバックを呼ばない（既にトップ画面に遷移済み）
             },
-            onAdFailedToShowFullScreenContent: (InterstitialAd ad, AdError error) {
-              print("広告表示に失敗しました: ${error.message}");
-              ad.dispose();
-              onAdClosed();
-            },
+            onAdFailedToShowFullScreenContent:
+                (InterstitialAd ad, AdError error) {
+                  print("広告表示に失敗しました: ${error.message}");
+                  ad.dispose();
+                  onAdClosed();
+                },
             onAdShowedFullScreenContent: (InterstitialAd ad) {
               print("広告が表示されました");
               // 少し遅延してからトップ画面に遷移
@@ -380,8 +384,10 @@ class GamePage extends ConsumerWidget {
   }
 
   void _proceedToNext(BuildContext context, GameViewModel gameViewModel) {
-    print("_proceedToNext called. isLastQuestion: ${gameViewModel.isLastQuestion}");
-    
+    print(
+      "_proceedToNext called. isLastQuestion: ${gameViewModel.isLastQuestion}",
+    );
+
     // 10問目の場合のみトップ画面に戻る
     if (gameViewModel.isLastQuestion) {
       // 最後の問題の場合は、nextQuestion()を呼び出してからトップ画面に戻る
@@ -422,7 +428,7 @@ class GamePage extends ConsumerWidget {
     // 評価ダイアログを表示
     final gameState = ref.read(gameViewModelProvider);
     final isLastQuestion = gameState.currentQuestionIndex == 9;
-    
+
     showDialog<void>(
       context: context,
       barrierDismissible: false,

@@ -9,7 +9,7 @@ class KatakanaNashiApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return MaterialApp(
-      title: 'カタカナハナシ',
+      title: 'ことばかくれんぼ',
       theme: AppTheme.lightTheme,
       onGenerateRoute: AppRouter.generateRoute,
       initialRoute: AppRouter.splashRoute,

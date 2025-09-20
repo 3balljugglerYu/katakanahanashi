@@ -92,7 +92,7 @@ class _SplashPageState extends State<SplashPage> {
             const SizedBox(height: 32),
             // アプリ名
             Text(
-              'カタカナハナシ',
+              'ことばかくれんぼ',
               style: TextStyle(
                 fontSize: 32,
                 fontWeight: FontWeight.bold,

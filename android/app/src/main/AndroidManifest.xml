@@ -1,6 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application
-        android:label="カタカナハナシ"
+        android:label="ことばかくれんぼ"
         android:name="${applicationName}"
         android:icon="@mipmap/launcher_icon">
         <activity

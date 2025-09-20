@@ -73,9 +73,8 @@ class OnboardingPage extends ConsumerWidget {
     return [
       // 1ページ目: アプリの紹介
       PageViewModel(
-        title: "カタカナハナシへ\nようこそ！",
-        body:
-            "カタカナ禁止のことば遊びゲームです。\n\n遊びながら日本語の言い換え力を鍛えましょう！",
+        title: "ことばかくれんぼへ\nようこそ！",
+        body: "カタカナ禁止のことば遊びゲームです。\n\n遊びながら日本語の言い換え力を鍛えましょう！",
         image: _buildImageWidget(
           context,
           imagePath: 'assets/images/tutorial_1.png',
@@ -88,7 +87,7 @@ class OnboardingPage extends ConsumerWidget {
       PageViewModel(
         title: "ルールは『カタカナ禁止』",
         body:
-        "出題者が「お題」を確認し、カタカナを使わずに説明しましょう。\n\n"
+            "出題者が「お題」を確認し、カタカナを使わずに説明しましょう。\n\n"
             "『パン』→「小麦で作られた主食の...」\n\n"
             "回答者が正解したら[次へ]をタップ！",
         image: _buildImageWidget(
@@ -116,8 +115,7 @@ class OnboardingPage extends ConsumerWidget {
       // 4ページ目: 楽しみ方
       PageViewModel(
         title: "待ち時間に最適 ♪",
-        body:
-            "ドライブやお散歩、ちょっとした待ち時間などに、遊んでみて下さいね！\n\nきっと盛り上がりますよ♪",
+        body: "ドライブやお散歩、ちょっとした待ち時間などに、遊んでみて下さいね！\n\nきっと盛り上がりますよ♪",
         image: _buildImageWidget(
           context,
           imagePath: 'assets/images/tutorial_4.png',

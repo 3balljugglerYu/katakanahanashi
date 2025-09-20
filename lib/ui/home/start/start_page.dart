@@ -52,7 +52,7 @@ class StartPage extends ConsumerWidget {
                   child: FittedBox(
                     fit: BoxFit.scaleDown,
                     child: Text(
-                      'カタカナハナシ',
+                      'ことばかくれんぼ',
                       style: TextStyle(
                         fontSize: MediaQuery.of(context).size.width * 0.12,
                         fontWeight: FontWeight.bold,

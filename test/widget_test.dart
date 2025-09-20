@@ -12,13 +12,9 @@ import 'package:katakanahanashi/ui/app.dart';
 
 void main() {
   testWidgets('App starts with StartPage', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const ProviderScope(
-        child: KatakanaNashiApp(),
-      ),
-    );
+    await tester.pumpWidget(const ProviderScope(child: KatakanaNashiApp()));
 
-    expect(find.text('カタカナハナシ'), findsOneWidget);
+    expect(find.text('ことばかくれんぼ'), findsOneWidget);
     expect(find.text('🎯 スタート'), findsOneWidget);
   });
 }
