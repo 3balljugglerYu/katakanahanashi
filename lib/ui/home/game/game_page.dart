@@ -1,11 +1,13 @@
 import 'dart:io';
+
 import 'package:flutter/material.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
-import '../../navigator/app_router.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:katakanahanashi/navigator/app_router.dart';
+import 'package:katakanahanashi/ui/home/widgets/dialogs/completion_dialog.dart';
+import 'package:katakanahanashi/ui/home/widgets/dialogs/rating_dialog.dart';
+
 import 'game_view_model.dart';
-import 'widgets/rating_dialog.dart';
-import 'widgets/completion_dialog.dart';
 
 class GamePage extends ConsumerWidget {
   const GamePage({super.key});

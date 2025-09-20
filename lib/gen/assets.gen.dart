@@ -21,11 +21,40 @@ class $AssetsIconGen {
   List<AssetGenImage> get values => [appIcon];
 }
 
+class $AssetsImagesGen {
+  const $AssetsImagesGen();
+
+  /// File path: assets/images/tutorial_1.png
+  AssetGenImage get tutorial1 =>
+      const AssetGenImage('assets/images/tutorial_1.png');
+
+  /// File path: assets/images/tutorial_2.png
+  AssetGenImage get tutorial2 =>
+      const AssetGenImage('assets/images/tutorial_2.png');
+
+  /// File path: assets/images/tutorial_3.png
+  AssetGenImage get tutorial3 =>
+      const AssetGenImage('assets/images/tutorial_3.png');
+
+  /// File path: assets/images/tutorial_4.png
+  AssetGenImage get tutorial4 =>
+      const AssetGenImage('assets/images/tutorial_4.png');
+
+  /// List of all assets
+  List<AssetGenImage> get values => [
+    tutorial1,
+    tutorial2,
+    tutorial3,
+    tutorial4,
+  ];
+}
+
 class Assets {
   const Assets._();
 
   static const String aEnv = '.env';
   static const $AssetsIconGen icon = $AssetsIconGen();
+  static const $AssetsImagesGen images = $AssetsImagesGen();
 
   /// List of all assets
   static List<String> get values => [aEnv];

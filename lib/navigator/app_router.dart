@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import '../ui/splash/splash_page.dart';
-import '../ui/onboarding/onboarding_page.dart';
-import '../ui/home/start_page.dart';
-import '../ui/home/game_page.dart';
+
+import 'package:katakanahanashi/ui/home/game/game_page.dart';
+import 'package:katakanahanashi/ui/home/start/start_page.dart';
+import 'package:katakanahanashi/ui/onboarding/onboarding_page.dart';
+import 'package:katakanahanashi/ui/splash/splash_page.dart';
 
 class AppRouter {
   static const String splashRoute = '/';

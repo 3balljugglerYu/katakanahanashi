@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import '../../data/services/onboarding_service.dart';
-import '../onboarding/onboarding_page.dart';
-import '../home/start_page.dart';
+
+import 'package:katakanahanashi/data/services/onboarding_service.dart';
+import 'package:katakanahanashi/ui/home/start/start_page.dart';
+import 'package:katakanahanashi/ui/onboarding/onboarding_page.dart';
 
 /// スプラッシュページ - 初回起動時の制御を行う
 class SplashPage extends StatefulWidget {
