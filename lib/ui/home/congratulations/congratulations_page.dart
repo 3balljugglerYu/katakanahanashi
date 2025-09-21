@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 
 import 'package:katakanahanashi/ui/home/ad/ad_display_page.dart';
 
-class AdNoticePage extends StatelessWidget {
-  const AdNoticePage({super.key});
+class CongratulationsPage extends StatelessWidget {
+  const CongratulationsPage({super.key});
 
   @override
   Widget build(BuildContext context) {

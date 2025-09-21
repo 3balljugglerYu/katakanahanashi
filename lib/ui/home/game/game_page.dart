@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:katakanahanashi/navigator/app_router.dart';
-import 'package:katakanahanashi/ui/home/ad/ad_notice_page.dart';
+import 'package:katakanahanashi/ui/home/congratulations/congratulations_page.dart';
 import 'package:katakanahanashi/ui/home/widgets/dialogs/rating_dialog.dart';
 
 import 'game_view_model.dart';
@@ -289,7 +289,7 @@ class GamePage extends ConsumerWidget {
     );
   }
 
-  void _navigateToAdNotice(
+  void _navigateToCongratulationsPage(
     NavigatorState navigator,
     GameViewModel gameViewModel,
   ) {
@@ -304,7 +304,7 @@ class GamePage extends ConsumerWidget {
     }
 
     navigator.pushReplacement(
-      MaterialPageRoute(builder: (context) => const AdNoticePage()),
+      MaterialPageRoute(builder: (context) => const CongratulationsPage()),
     );
   }
 
@@ -467,9 +467,9 @@ class GamePage extends ConsumerWidget {
             navigator.pop();
           }
 
-          // 10問目の場合は完了ダイアログを表示
+          // 10問目の場合は広告案内ページに遷移
           if (isLastQuestion) {
-            _navigateToAdNotice(navigator, gameViewModel);
+            _navigateToCongratulationsPage(navigator, gameViewModel);
           } else {
             _proceedToNext(context, gameViewModel);
           }
