@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:katakanahanashi/navigator/app_router.dart';
-import 'package:katakanahanashi/ui/home/widgets/dialogs/completion_dialog.dart';
+import 'package:katakanahanashi/ui/home/ad/ad_notice_page.dart';
 import 'package:katakanahanashi/ui/home/widgets/dialogs/rating_dialog.dart';
 
 import 'game_view_model.dart';
@@ -289,8 +289,8 @@ class GamePage extends ConsumerWidget {
     );
   }
 
-  void _showCompletionDialog(
-    BuildContext context,
+  void _navigateToAdNotice(
+    NavigatorState navigator,
     GameViewModel gameViewModel,
   ) {
     // ゲーム終了処理を先に実行
@@ -299,10 +299,12 @@ class GamePage extends ConsumerWidget {
     // 広告の事前読み込みを開始
     _preloadInterstitialAd();
 
-    showDialog<void>(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => const CompletionDialog(),
+    if (!navigator.mounted) {
+      return;
+    }
+
+    navigator.pushReplacement(
+      MaterialPageRoute(builder: (context) => const AdNoticePage()),
     );
   }
 
@@ -424,6 +426,7 @@ class GamePage extends ConsumerWidget {
     GameViewModel gameViewModel,
   ) {
     final currentWord = gameViewModel.currentWord;
+    final navigator = Navigator.of(context, rootNavigator: true);
 
     // 評価ダイアログを表示
     final gameState = ref.read(gameViewModelProvider);
@@ -460,13 +463,13 @@ class GamePage extends ConsumerWidget {
           final result = await gameViewModel.submitRating(rating);
 
           // ローディングダイアログを閉じる
-          if (context.mounted) {
-            Navigator.of(context).pop();
+          if (navigator.mounted) {
+            navigator.pop();
           }
 
           // 10問目の場合は完了ダイアログを表示
           if (isLastQuestion) {
-            _showCompletionDialog(context, gameViewModel);
+            _navigateToAdNotice(navigator, gameViewModel);
           } else {
             _proceedToNext(context, gameViewModel);
           }
