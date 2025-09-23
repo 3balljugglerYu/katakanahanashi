@@ -14,6 +14,9 @@ import 'package:flutter/widgets.dart';
 class $AssetsAnimationsGen {
   const $AssetsAnimationsGen();
 
+  /// File path: assets/animations/Cat in a rocket.json
+  String get catInARocket => 'assets/animations/Cat in a rocket.json';
+
   /// File path: assets/animations/Celebration.json
   String get celebration => 'assets/animations/Celebration.json';
 
@@ -32,6 +35,7 @@ class $AssetsAnimationsGen {
 
   /// List of all assets
   List<String> get values => [
+    catInARocket,
     celebration,
     celebrationsBegin,
     congratulations,

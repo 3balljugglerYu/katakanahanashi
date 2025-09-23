@@ -36,6 +36,8 @@ class CongratulationsResources {
   final Widget congratsLottie;
   final AnimationController confettiController;
   final Widget confettiLottie;
+  final AnimationController rocketController;
+  final Widget rocketLottie;
 
   const CongratulationsResources({
     required this.scaleController,
@@ -44,6 +46,8 @@ class CongratulationsResources {
     required this.congratsLottie,
     required this.confettiController,
     required this.confettiLottie,
+    required this.rocketController,
+    required this.rocketLottie,
   });
 
   /// リソースの解放
@@ -51,5 +55,6 @@ class CongratulationsResources {
     scaleController.dispose();
     lottieController.dispose();
     confettiController.dispose();
+    rocketController.dispose();
   }
 }

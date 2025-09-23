@@ -55,19 +55,17 @@ class CongratulationsViewModel extends StateNotifier<CongratulationsState> {
     // Lottieコントローラー
     final lottieController = AnimationController(vsync: vsync);
     final confettiController = AnimationController(vsync: vsync);
+    final rocketController = AnimationController(vsync: vsync);
 
     // Congratulations Lottieアニメーション
     final congratsLottie = LottieBuilder.asset(
       'assets/animations/Congratulations.json',
       controller: lottieController,
+      repeat: false, // 自動再生しない
       fit: BoxFit.contain,
       onLoaded: (composition) {
-        lottieController
-          ..duration = composition.duration
-          ..repeat();
-
-        // スケールアニメーションは遅延開始（画面遷移完了後4秒）
-        // ここでは開始しない
+        lottieController.duration = composition.duration;
+        // 遅延開始は後で設定
       },
     );
 
@@ -83,6 +81,18 @@ class CongratulationsViewModel extends StateNotifier<CongratulationsState> {
       },
     );
 
+    // ロケット猫 Lottieアニメーション
+    final rocketLottie = LottieBuilder.asset(
+      'assets/animations/Cat in a rocket.json',
+      controller: rocketController,
+      repeat: false,
+      fit: BoxFit.contain,
+      onLoaded: (composition) {
+        rocketController.duration = composition.duration;
+        // 遅延開始は後で設定
+      },
+    );
+
     // リソースを作成
     _resources = CongratulationsResources(
       scaleController: scaleController,
@@ -91,6 +101,8 @@ class CongratulationsViewModel extends StateNotifier<CongratulationsState> {
       congratsLottie: congratsLottie,
       confettiController: confettiController,
       confettiLottie: confettiLottie,
+      rocketController: rocketController,
+      rocketLottie: rocketLottie,
     );
 
     return _resources!;
@@ -112,7 +124,7 @@ class CongratulationsViewModel extends StateNotifier<CongratulationsState> {
   /// アニメーションを遅延開始
   void _startAnimationsWithDelay() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Future.delayed(const Duration(milliseconds: 4000), () {
+      Future.delayed(const Duration(milliseconds: 400), () {
         if (_resources != null && state.canReset) {
           startAnimations();
         }
@@ -136,9 +148,19 @@ class CongratulationsViewModel extends StateNotifier<CongratulationsState> {
       _resources!.scaleController.forward();
     }
 
+    // Congratulations Lottieアニメーション開始
+    if (!_resources!.lottieController.isAnimating) {
+      _resources!.lottieController.repeat();
+    }
+
     // 紙吹雪アニメーション開始
     if (!_resources!.confettiController.isAnimating) {
       _resources!.confettiController.forward();
+    }
+
+    // ロケット猫アニメーション開始
+    if (!_resources!.rocketController.isAnimating) {
+      _resources!.rocketController.repeat();
     }
   }
 
@@ -148,7 +170,9 @@ class CongratulationsViewModel extends StateNotifier<CongratulationsState> {
 
     // アニメーションコントローラーをリセット
     _resources!.scaleController.reset();
+    _resources!.lottieController.stop();
     _resources!.confettiController.reset();
+    _resources!.rocketController.reset();
 
     // 状態を更新：リセット状態に
     state = state.copyWith(

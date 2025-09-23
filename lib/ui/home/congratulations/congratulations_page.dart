@@ -79,8 +79,22 @@ class _CongratulationsContent extends StatelessWidget {
                 ),
               ),
             ),
+
+            // 画面の真ん中にロケット猫アニメーション
             Positioned(
-              bottom: 48,
+              top: size.height * 0.5 - 200, // 画面の真ん中から少し上
+              left: 0,
+              right: 0,
+              child: Center(
+                child: SizedBox(
+                  width: 400,
+                  height: 400,
+                  child: resources.rocketLottie,
+                ),
+              ),
+            ),
+            Positioned(
+              bottom: 100,
               left: 24,
               right: 24,
               child: ElevatedButton(
