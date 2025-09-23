@@ -11,22 +11,32 @@ class CongratulationsState with _$CongratulationsState {
     required Animation<double> scaleAnimation,
     required AnimationController lottieController,
     required Widget congratsLottie,
+    required AnimationController confettiController,
+    required Widget confettiLottie,
+    @Default(false) bool isAnimationStarted,
+    @Default(false) bool isScaleAnimating,
+    @Default(false) bool isConfettiAnimating,
+    @Default(0.0) double animationProgress,
   }) = _CongratulationsState;
 
   const CongratulationsState._();
 
   /// アニメーションが実行中かどうか
-  bool get isAnimating => scaleController.isAnimating;
+  bool get isAnimating => isScaleAnimating || isConfettiAnimating;
 
   /// スケールアニメーションの現在値
   double get scaleValue => scaleAnimation.value;
 
-  /// アニメーションが初期状態（0.0）かどうか
-  bool get isInitialState => scaleController.value == 0.0;
+  /// アニメーションが初期状態かどうか
+  bool get isInitialState => !isAnimationStarted;
+
+  /// アニメーションをリセットできる状態かどうか
+  bool get canReset => !isAnimating;
 
   /// リソースの解放
   void dispose() {
     scaleController.dispose();
     lottieController.dispose();
+    confettiController.dispose();
   }
 }

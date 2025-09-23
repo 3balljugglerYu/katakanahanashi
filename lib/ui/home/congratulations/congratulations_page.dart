@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:katakanahanashi/ui/home/ad/ad_display_page.dart';
-import 'package:lottie/lottie.dart';
 import 'congratulations_view_model.dart';
 import 'congratulations_state.dart';
 
@@ -16,24 +15,26 @@ class CongratulationsPage extends ConsumerStatefulWidget {
 class _CongratulationsPageState extends ConsumerState<CongratulationsPage>
     with TickerProviderStateMixin {
   late final CongratulationsViewModel _viewModel;
-  late final CongratulationsState _state;
+  CongratulationsState? _initializedState;
 
   @override
   void initState() {
     super.initState();
-    _viewModel = ref.read(congratulationsViewModelProvider);
-    _state = _viewModel.initialize(this);
-  }
-
-  @override
-  void dispose() {
-    _viewModel.dispose();
-    super.dispose();
+    _viewModel = ref.read(congratulationsViewModelProvider.notifier);
+    _initializedState = _viewModel.initialize(this);
   }
 
   @override
   Widget build(BuildContext context) {
-    return _CongratulationsContent(state: _state);
+    // StateNotifierの状態を監視
+    final currentState = ref.watch(congratulationsViewModelProvider);
+    final displayState = currentState ?? _initializedState;
+
+    if (displayState == null) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
+    return _CongratulationsContent(state: displayState);
   }
 }
 
@@ -45,7 +46,7 @@ class _CongratulationsContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    final baseWidth = size.width * 0.45;
+    final baseWidth = size.width;
 
     return PopScope(
       canPop: false,
@@ -55,13 +56,7 @@ class _CongratulationsContent extends StatelessWidget {
           clipBehavior: Clip.none,
           children: [
             // 背景：紙吹雪
-            Positioned.fill(
-              child: Lottie.asset(
-                'assets/animations/confetti on transparent background.json',
-                repeat: false,
-                fit: BoxFit.cover,
-              ),
-            ),
+            Positioned.fill(child: state.confettiLottie),
 
             // 中央の Congratulations をシンプルに拡大
             Positioned(
