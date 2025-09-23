@@ -59,8 +59,8 @@ class CongratulationsViewModel extends StateNotifier<CongratulationsState> {
     );
     final positionAnimation =
         Tween<double>(
-          begin: 0.3, // size.height * 0.2
-          end: 50 / 800, // 50pxを画面高さで正規化（800px想定）
+          begin: 0.40, // 画面の40%の位置
+          end: 0.2, // 画面の20%の位置
         ).animate(
           CurvedAnimation(parent: positionController, curve: Curves.easeInOut),
         );

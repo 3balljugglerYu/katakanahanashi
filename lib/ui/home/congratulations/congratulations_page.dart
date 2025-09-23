@@ -68,7 +68,9 @@ class _CongratulationsContent extends StatelessWidget {
               animation: resources.positionAnimation,
               builder: (context, child) {
                 return Positioned(
-                  top: size.height * resources.positionAnimation.value,
+                  top:
+                      size.height * resources.positionAnimation.value -
+                      100, // 高さの半分を補正
                   left: 0,
                   right: 0,
                   child: Center(
