@@ -35,6 +35,9 @@ class CongratulationsViewModel extends StateNotifier<CongratulationsState> {
 
   /// 初期化（リソース作成のみ）
   CongratulationsResources initialize(TickerProvider vsync) {
+    // 初期化時に状態を完全にリセット（2回目以降の表示対応）
+    _forceResetState();
+
     // 既に初期化済みの場合は既存のリソースを返す
     if (_resources != null) {
       return _resources!;
@@ -149,12 +152,29 @@ class CongratulationsViewModel extends StateNotifier<CongratulationsState> {
     if (state.isAnimationStarted) {
       resetAnimations();
     } else {
-      // 初回の場合は遅延開始
+      // 初回の場合は遅延開始（後方互換性のため残す）
       _startAnimationsWithDelay();
     }
   }
 
-  /// アニメーションを遅延開始
+  /// アニメーション即座開始（遷移完了検知用）
+  void startInitializationImmediately() {
+    if (_resources == null) return;
+
+    // 既に初期化済みの場合はリセット
+    if (state.isAnimationStarted) {
+      resetAnimations();
+    } else {
+      // 即座にアニメーション開始
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (_resources != null && state.canReset) {
+          startAnimations();
+        }
+      });
+    }
+  }
+
+  /// アニメーションを遅延開始（後方互換性のため保持）
   void _startAnimationsWithDelay() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Future.delayed(const Duration(milliseconds: 400), () {
@@ -255,6 +275,41 @@ class CongratulationsViewModel extends StateNotifier<CongratulationsState> {
       isScaleAnimating: false,
       isConfettiAnimating: false,
       animationProgress: 1.0,
+    );
+  }
+
+  /// 画面破棄時の完全リセット
+  void resetForDispose() {
+    if (_resources != null) {
+      // アニメーションを完全停止
+      _resources!.scaleController.stop();
+      _resources!.positionController.stop();
+      _resources!.rocketPositionController.stop();
+      _resources!.lottieController.stop();
+      _resources!.confettiController.stop();
+      _resources!.rocketController.stop();
+
+      // アニメーションコントローラーをリセット
+      _resources!.scaleController.reset();
+      _resources!.positionController.reset();
+      _resources!.rocketPositionController.reset();
+      _resources!.lottieController.reset();
+      _resources!.confettiController.reset();
+      _resources!.rocketController.reset();
+    }
+
+    // 状態を初期状態に完全リセット
+    _forceResetState();
+  }
+
+  /// 状態の強制リセット（内部用）
+  void _forceResetState() {
+    state = const CongratulationsState(
+      isAnimationStarted: false,
+      isScaleAnimating: false,
+      isConfettiAnimating: false,
+      isRocketVisible: false,
+      animationProgress: 0.0,
     );
   }
 

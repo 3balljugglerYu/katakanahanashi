@@ -22,10 +22,45 @@ class _CongratulationsPageState extends ConsumerState<CongratulationsPage>
     _viewModel = ref.read(congratulationsViewModelProvider.notifier);
     // リソース初期化（状態変更なし）
     _viewModel.initialize(this);
-    // 遅延実行でアニメーション開始
+    // 遷移完了検知でアニメーション開始
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _viewModel.startInitialization();
+      _waitForTransitionComplete();
     });
+  }
+
+  /// 画面遷移完了を検知してアニメーション開始
+  void _waitForTransitionComplete() {
+    final route = ModalRoute.of(context);
+
+    if (route?.animation?.status == AnimationStatus.completed) {
+      // 既に遷移完了済み - 即座に開始
+      _viewModel.startInitializationImmediately();
+    } else {
+      // 遷移完了を待機
+      void statusListener(AnimationStatus status) {
+        if (status == AnimationStatus.completed) {
+          route?.animation?.removeStatusListener(statusListener);
+          _viewModel.startInitializationImmediately();
+        }
+      }
+
+      route?.animation?.addStatusListener(statusListener);
+
+      // フォールバック: 最大1秒待機後に強制開始
+      Future.delayed(const Duration(milliseconds: 1000), () {
+        if (route?.animation?.status != AnimationStatus.completed) {
+          route?.animation?.removeStatusListener(statusListener);
+          _viewModel.startInitializationImmediately();
+        }
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    // 画面破棄時に状態とリソースをリセット
+    _viewModel.resetForDispose();
+    super.dispose();
   }
 
   @override
