@@ -1,29 +1,39 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:katakanahanashi/ui/home/ad/ad_display_page.dart';
 import 'package:lottie/lottie.dart';
 import 'congratulations_view_model.dart';
 import 'congratulations_state.dart';
 
-class CongratulationsPage extends HookConsumerWidget {
+class CongratulationsPage extends ConsumerStatefulWidget {
   const CongratulationsPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final viewModel = ref.watch(congratulationsViewModelProvider);
-    final tickerProvider = useSingleTickerProvider();
+  ConsumerState<CongratulationsPage> createState() =>
+      _CongratulationsPageState();
+}
 
-    // 初期化を実行して状態を取得
-    final state = useMemoized(() => viewModel.initialize(tickerProvider), []);
+class _CongratulationsPageState extends ConsumerState<CongratulationsPage>
+    with TickerProviderStateMixin {
+  late final CongratulationsViewModel _viewModel;
+  late final CongratulationsState _state;
 
-    useEffect(() {
-      return () {
-        viewModel.dispose();
-      };
-    }, []);
+  @override
+  void initState() {
+    super.initState();
+    _viewModel = ref.read(congratulationsViewModelProvider);
+    _state = _viewModel.initialize(this);
+  }
 
-    return _CongratulationsContent(state: state);
+  @override
+  void dispose() {
+    _viewModel.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return _CongratulationsContent(state: _state);
   }
 }
 
