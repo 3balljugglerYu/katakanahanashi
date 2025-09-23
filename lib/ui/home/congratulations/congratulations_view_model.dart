@@ -72,8 +72,8 @@ class CongratulationsViewModel extends StateNotifier<CongratulationsState> {
     );
     final rocketPositionAnimation =
         Tween<Offset>(
-          begin: const Offset(-0.5, 1.2), // 画面外左下（-50%, 120%）
-          end: const Offset(0.0, 0.25), // 画面中央（0%, 50%）
+          begin: const Offset(-1.0, 0.8), // 画面外左下（-100%, 120%）
+          end: const Offset(0.0, 0.5), // 画面中央（0%, 50%）
         ).animate(
           CurvedAnimation(
             parent: rocketPositionController,

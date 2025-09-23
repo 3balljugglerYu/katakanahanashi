@@ -90,7 +90,9 @@ class _CongratulationsContent extends StatelessWidget {
               animation: resources.rocketPositionAnimation,
               builder: (context, child) {
                 return Positioned(
-                  top: size.height * resources.rocketPositionAnimation.value.dy,
+                  top:
+                      size.height * resources.rocketPositionAnimation.value.dy -
+                      200, // 400pxの半分を引く
                   left: size.width * resources.rocketPositionAnimation.value.dx,
                   child: SizedBox(
                     width: 400,
