@@ -32,6 +32,8 @@ class CongratulationsState with _$CongratulationsState {
 class CongratulationsResources {
   final AnimationController scaleController;
   final Animation<double> scaleAnimation;
+  final AnimationController positionController;
+  final Animation<double> positionAnimation;
   final AnimationController lottieController;
   final Widget congratsLottie;
   final AnimationController confettiController;
@@ -42,6 +44,8 @@ class CongratulationsResources {
   const CongratulationsResources({
     required this.scaleController,
     required this.scaleAnimation,
+    required this.positionController,
+    required this.positionAnimation,
     required this.lottieController,
     required this.congratsLottie,
     required this.confettiController,
@@ -53,6 +57,7 @@ class CongratulationsResources {
   /// リソースの解放
   void dispose() {
     scaleController.dispose();
+    positionController.dispose();
     lottieController.dispose();
     confettiController.dispose();
     rocketController.dispose();

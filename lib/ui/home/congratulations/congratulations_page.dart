@@ -64,20 +64,25 @@ class _CongratulationsContent extends StatelessWidget {
             Positioned.fill(child: resources.confettiLottie),
 
             // 中央の Congratulations をシンプルに拡大
-            Positioned(
-              top: size.height * 0.2,
-              left: 0,
-              right: 0,
-              child: Center(
-                child: ScaleTransition(
-                  scale: resources.scaleAnimation,
-                  alignment: Alignment.center,
-                  child: SizedBox(
-                    width: baseWidth,
-                    child: resources.congratsLottie,
+            AnimatedBuilder(
+              animation: resources.positionAnimation,
+              builder: (context, child) {
+                return Positioned(
+                  top: size.height * resources.positionAnimation.value,
+                  left: 0,
+                  right: 0,
+                  child: Center(
+                    child: ScaleTransition(
+                      scale: resources.scaleAnimation,
+                      alignment: Alignment.center,
+                      child: SizedBox(
+                        width: baseWidth,
+                        child: resources.congratsLottie,
+                      ),
+                    ),
                   ),
-                ),
-              ),
+                );
+              },
             ),
 
             // 画面の真ん中にロケット猫アニメーション

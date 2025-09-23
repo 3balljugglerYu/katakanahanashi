@@ -52,6 +52,19 @@ class CongratulationsViewModel extends StateNotifier<CongratulationsState> {
       curve: Curves.elasticOut,
     ).drive(Tween(begin: 0.3, end: 1.0));
 
+    // 位置移動アニメーション（2秒後に上に移動）
+    final positionController = AnimationController(
+      duration: const Duration(milliseconds: 1000),
+      vsync: vsync,
+    );
+    final positionAnimation =
+        Tween<double>(
+          begin: 0.3, // size.height * 0.2
+          end: 50 / 800, // 50pxを画面高さで正規化（800px想定）
+        ).animate(
+          CurvedAnimation(parent: positionController, curve: Curves.easeInOut),
+        );
+
     // Lottieコントローラー
     final lottieController = AnimationController(vsync: vsync);
     final confettiController = AnimationController(vsync: vsync);
@@ -97,6 +110,8 @@ class CongratulationsViewModel extends StateNotifier<CongratulationsState> {
     _resources = CongratulationsResources(
       scaleController: scaleController,
       scaleAnimation: scaleAnimation,
+      positionController: positionController,
+      positionAnimation: positionAnimation,
       lottieController: lottieController,
       congratsLottie: congratsLottie,
       confettiController: confettiController,
@@ -162,6 +177,13 @@ class CongratulationsViewModel extends StateNotifier<CongratulationsState> {
     if (!_resources!.rocketController.isAnimating) {
       _resources!.rocketController.repeat();
     }
+
+    // 2秒後に位置移動アニメーション開始
+    Future.delayed(const Duration(milliseconds: 2000), () {
+      if (_resources != null && !_resources!.positionController.isAnimating) {
+        _resources!.positionController.forward();
+      }
+    });
   }
 
   /// アニメーションをリセット
@@ -170,6 +192,7 @@ class CongratulationsViewModel extends StateNotifier<CongratulationsState> {
 
     // アニメーションコントローラーをリセット
     _resources!.scaleController.reset();
+    _resources!.positionController.reset();
     _resources!.lottieController.stop();
     _resources!.confettiController.reset();
     _resources!.rocketController.reset();
