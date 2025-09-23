@@ -1,59 +1,36 @@
 import 'package:flutter/material.dart';
-
+import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:katakanahanashi/ui/home/ad/ad_display_page.dart';
 import 'package:lottie/lottie.dart';
+import 'congratulations_view_model.dart';
+import 'congratulations_state.dart';
 
-class CongratulationsPage extends StatefulWidget {
+class CongratulationsPage extends HookConsumerWidget {
   const CongratulationsPage({super.key});
 
   @override
-  State<CongratulationsPage> createState() => _CongratulationsPageState();
+  Widget build(BuildContext context, WidgetRef ref) {
+    final viewModel = ref.watch(congratulationsViewModelProvider);
+    final tickerProvider = useSingleTickerProvider();
+
+    // 初期化を実行して状態を取得
+    final state = useMemoized(() => viewModel.initialize(tickerProvider), []);
+
+    useEffect(() {
+      return () {
+        viewModel.dispose();
+      };
+    }, []);
+
+    return _CongratulationsContent(state: state);
+  }
 }
 
-class _CongratulationsPageState extends State<CongratulationsPage>
-    with TickerProviderStateMixin {
-  late final AnimationController _scaleController;
-  late final Animation<double> _scaleAnimation;
-  late final AnimationController _lottieController; // 追加: Lottie用
+class _CongratulationsContent extends StatelessWidget {
+  final CongratulationsState state;
 
-  late final Widget _congratsLottie;
-
-  @override
-  void initState() {
-    super.initState();
-
-    _scaleController = AnimationController(
-      duration: const Duration(milliseconds: 10000),
-      vsync: this,
-    );
-    _scaleAnimation = CurvedAnimation(
-      parent: _scaleController,
-      curve: Curves.elasticOut,
-    ).drive(Tween(begin: 0.3, end: 2.0));
-
-    _lottieController = AnimationController(vsync: this);
-
-    _congratsLottie = LottieBuilder.asset(
-      'assets/animations/Congratulations.json',
-      controller: _lottieController,
-      fit: BoxFit.contain, // 明示しておくと安心
-      onLoaded: (composition) {
-        _lottieController
-          ..duration = composition.duration
-          ..repeat(); // repeat()メソッドを使用
-        if (!_scaleController.isAnimating && _scaleController.value == 0.0) {
-          _scaleController.forward();
-        }
-      },
-    );
-  }
-
-  @override
-  void dispose() {
-    _scaleController.dispose();
-    _lottieController.dispose();
-    super.dispose();
-  }
+  const _CongratulationsContent({required this.state});
 
   @override
   Widget build(BuildContext context) {
@@ -65,7 +42,7 @@ class _CongratulationsPageState extends State<CongratulationsPage>
       child: Scaffold(
         backgroundColor: Colors.orange.shade50,
         body: Stack(
-          clipBehavior: Clip.none, // クリップしない
+          clipBehavior: Clip.none,
           children: [
             // 背景：紙吹雪
             Positioned.fill(
@@ -83,13 +60,11 @@ class _CongratulationsPageState extends State<CongratulationsPage>
               right: 0,
               child: Center(
                 child: ScaleTransition(
-                  scale: _scaleAnimation,
+                  scale: state.scaleAnimation,
                   alignment: Alignment.center,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      border: Border.all(width: 2, color: Colors.red),
-                    ),
-                    child: SizedBox(width: baseWidth, child: _congratsLottie),
+                  child: SizedBox(
+                    width: baseWidth,
+                    child: state.congratsLottie,
                   ),
                 ),
               ),
