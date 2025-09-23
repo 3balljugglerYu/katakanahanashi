@@ -11,6 +11,35 @@
 
 import 'package:flutter/widgets.dart';
 
+class $AssetsAnimationsGen {
+  const $AssetsAnimationsGen();
+
+  /// File path: assets/animations/Celebration.json
+  String get celebration => 'assets/animations/Celebration.json';
+
+  /// File path: assets/animations/Celebrations Begin.json
+  String get celebrationsBegin => 'assets/animations/Celebrations Begin.json';
+
+  /// File path: assets/animations/Congratulations.json
+  String get congratulations => 'assets/animations/Congratulations.json';
+
+  /// File path: assets/animations/Rocket Launch.json
+  String get rocketLaunch => 'assets/animations/Rocket Launch.json';
+
+  /// File path: assets/animations/confetti on transparent background.json
+  String get confettiOnTransparentBackground =>
+      'assets/animations/confetti on transparent background.json';
+
+  /// List of all assets
+  List<String> get values => [
+    celebration,
+    celebrationsBegin,
+    congratulations,
+    rocketLaunch,
+    confettiOnTransparentBackground,
+  ];
+}
+
 class $AssetsIconGen {
   const $AssetsIconGen();
 
@@ -53,6 +82,7 @@ class Assets {
   const Assets._();
 
   static const String aEnv = '.env';
+  static const $AssetsAnimationsGen animations = $AssetsAnimationsGen();
   static const $AssetsIconGen icon = $AssetsIconGen();
   static const $AssetsImagesGen images = $AssetsImagesGen();
 
