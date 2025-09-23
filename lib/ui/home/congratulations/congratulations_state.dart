@@ -10,6 +10,7 @@ class CongratulationsState with _$CongratulationsState {
     @Default(false) bool isAnimationStarted,
     @Default(false) bool isScaleAnimating,
     @Default(false) bool isConfettiAnimating,
+    @Default(false) bool isRocketVisible,
     @Default(0.0) double animationProgress,
   }) = _CongratulationsState;
 

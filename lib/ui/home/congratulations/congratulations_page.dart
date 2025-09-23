@@ -87,23 +87,26 @@ class _CongratulationsContent extends StatelessWidget {
               },
             ),
 
-            // 画面の真ん中にロケット猫アニメーション
-            AnimatedBuilder(
-              animation: resources.rocketPositionAnimation,
-              builder: (context, child) {
-                return Positioned(
-                  top:
-                      size.height * resources.rocketPositionAnimation.value.dy -
-                      200, // 400pxの半分を引く
-                  left: size.width * resources.rocketPositionAnimation.value.dx,
-                  child: SizedBox(
-                    width: 400,
-                    height: 400,
-                    child: resources.rocketLottie,
-                  ),
-                );
-              },
-            ),
+            // 画面の真ん中にロケット猫アニメーション（条件付きレンダリング）
+            if (state.isRocketVisible)
+              AnimatedBuilder(
+                animation: resources.rocketPositionAnimation,
+                builder: (context, child) {
+                  return Positioned(
+                    top:
+                        size.height *
+                            resources.rocketPositionAnimation.value.dy -
+                        200, // 400pxの半分を引く
+                    left:
+                        size.width * resources.rocketPositionAnimation.value.dx,
+                    child: SizedBox(
+                      width: 400,
+                      height: 400,
+                      child: resources.rocketLottie,
+                    ),
+                  );
+                },
+              ),
             Positioned(
               bottom: 100,
               left: 24,

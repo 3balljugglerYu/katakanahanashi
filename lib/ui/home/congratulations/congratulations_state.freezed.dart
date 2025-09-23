@@ -20,6 +20,7 @@ mixin _$CongratulationsState {
   bool get isAnimationStarted => throw _privateConstructorUsedError;
   bool get isScaleAnimating => throw _privateConstructorUsedError;
   bool get isConfettiAnimating => throw _privateConstructorUsedError;
+  bool get isRocketVisible => throw _privateConstructorUsedError;
   double get animationProgress => throw _privateConstructorUsedError;
 
   /// Create a copy of CongratulationsState
@@ -40,6 +41,7 @@ abstract class $CongratulationsStateCopyWith<$Res> {
     bool isAnimationStarted,
     bool isScaleAnimating,
     bool isConfettiAnimating,
+    bool isRocketVisible,
     double animationProgress,
   });
 }
@@ -65,6 +67,7 @@ class _$CongratulationsStateCopyWithImpl<
     Object? isAnimationStarted = null,
     Object? isScaleAnimating = null,
     Object? isConfettiAnimating = null,
+    Object? isRocketVisible = null,
     Object? animationProgress = null,
   }) {
     return _then(
@@ -80,6 +83,10 @@ class _$CongratulationsStateCopyWithImpl<
             isConfettiAnimating: null == isConfettiAnimating
                 ? _value.isConfettiAnimating
                 : isConfettiAnimating // ignore: cast_nullable_to_non_nullable
+                      as bool,
+            isRocketVisible: null == isRocketVisible
+                ? _value.isRocketVisible
+                : isRocketVisible // ignore: cast_nullable_to_non_nullable
                       as bool,
             animationProgress: null == animationProgress
                 ? _value.animationProgress
@@ -104,6 +111,7 @@ abstract class _$$CongratulationsStateImplCopyWith<$Res>
     bool isAnimationStarted,
     bool isScaleAnimating,
     bool isConfettiAnimating,
+    bool isRocketVisible,
     double animationProgress,
   });
 }
@@ -125,6 +133,7 @@ class __$$CongratulationsStateImplCopyWithImpl<$Res>
     Object? isAnimationStarted = null,
     Object? isScaleAnimating = null,
     Object? isConfettiAnimating = null,
+    Object? isRocketVisible = null,
     Object? animationProgress = null,
   }) {
     return _then(
@@ -140,6 +149,10 @@ class __$$CongratulationsStateImplCopyWithImpl<$Res>
         isConfettiAnimating: null == isConfettiAnimating
             ? _value.isConfettiAnimating
             : isConfettiAnimating // ignore: cast_nullable_to_non_nullable
+                  as bool,
+        isRocketVisible: null == isRocketVisible
+            ? _value.isRocketVisible
+            : isRocketVisible // ignore: cast_nullable_to_non_nullable
                   as bool,
         animationProgress: null == animationProgress
             ? _value.animationProgress
@@ -157,6 +170,7 @@ class _$CongratulationsStateImpl extends _CongratulationsState {
     this.isAnimationStarted = false,
     this.isScaleAnimating = false,
     this.isConfettiAnimating = false,
+    this.isRocketVisible = false,
     this.animationProgress = 0.0,
   }) : super._();
 
@@ -171,11 +185,14 @@ class _$CongratulationsStateImpl extends _CongratulationsState {
   final bool isConfettiAnimating;
   @override
   @JsonKey()
+  final bool isRocketVisible;
+  @override
+  @JsonKey()
   final double animationProgress;
 
   @override
   String toString() {
-    return 'CongratulationsState(isAnimationStarted: $isAnimationStarted, isScaleAnimating: $isScaleAnimating, isConfettiAnimating: $isConfettiAnimating, animationProgress: $animationProgress)';
+    return 'CongratulationsState(isAnimationStarted: $isAnimationStarted, isScaleAnimating: $isScaleAnimating, isConfettiAnimating: $isConfettiAnimating, isRocketVisible: $isRocketVisible, animationProgress: $animationProgress)';
   }
 
   @override
@@ -189,6 +206,8 @@ class _$CongratulationsStateImpl extends _CongratulationsState {
                 other.isScaleAnimating == isScaleAnimating) &&
             (identical(other.isConfettiAnimating, isConfettiAnimating) ||
                 other.isConfettiAnimating == isConfettiAnimating) &&
+            (identical(other.isRocketVisible, isRocketVisible) ||
+                other.isRocketVisible == isRocketVisible) &&
             (identical(other.animationProgress, animationProgress) ||
                 other.animationProgress == animationProgress));
   }
@@ -199,6 +218,7 @@ class _$CongratulationsStateImpl extends _CongratulationsState {
     isAnimationStarted,
     isScaleAnimating,
     isConfettiAnimating,
+    isRocketVisible,
     animationProgress,
   );
 
@@ -220,6 +240,7 @@ abstract class _CongratulationsState extends CongratulationsState {
     final bool isAnimationStarted,
     final bool isScaleAnimating,
     final bool isConfettiAnimating,
+    final bool isRocketVisible,
     final double animationProgress,
   }) = _$CongratulationsStateImpl;
   const _CongratulationsState._() : super._();
@@ -230,6 +251,8 @@ abstract class _CongratulationsState extends CongratulationsState {
   bool get isScaleAnimating;
   @override
   bool get isConfettiAnimating;
+  @override
+  bool get isRocketVisible;
   @override
   double get animationProgress;
 

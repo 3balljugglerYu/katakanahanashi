@@ -191,11 +191,6 @@ class CongratulationsViewModel extends StateNotifier<CongratulationsState> {
       _resources!.confettiController.forward();
     }
 
-    // ロケット猫アニメーション開始
-    if (!_resources!.rocketController.isAnimating) {
-      _resources!.rocketController.repeat();
-    }
-
     // 2秒後に位置移動アニメーション開始
     Future.delayed(const Duration(milliseconds: 2000), () {
       if (_resources != null && !_resources!.positionController.isAnimating) {
@@ -203,11 +198,23 @@ class CongratulationsViewModel extends StateNotifier<CongratulationsState> {
       }
     });
 
+    // 1.8秒後にロケット猫を表示準備（条件付きレンダリング最適化）
+    Future.delayed(const Duration(milliseconds: 1800), () {
+      if (_resources != null) {
+        state = state.copyWith(isRocketVisible: true);
+      }
+    });
+
     // 2秒後にロケット猫の飛び込みアニメーション開始
     Future.delayed(const Duration(milliseconds: 2000), () {
       if (_resources != null &&
           !_resources!.rocketPositionController.isAnimating) {
+        // ロケット猫のアニメーションを開始
         _resources!.rocketPositionController.forward();
+        // ロケット猫のLottieアニメーションも開始（遅延開始でリソース節約）
+        if (!_resources!.rocketController.isAnimating) {
+          _resources!.rocketController.repeat();
+        }
       }
     });
   }
@@ -229,6 +236,7 @@ class CongratulationsViewModel extends StateNotifier<CongratulationsState> {
       isAnimationStarted: false,
       isScaleAnimating: false,
       isConfettiAnimating: false,
+      isRocketVisible: false,
       animationProgress: 0.0,
     );
 
