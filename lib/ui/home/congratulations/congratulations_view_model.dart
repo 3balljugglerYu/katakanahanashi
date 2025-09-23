@@ -5,22 +5,39 @@ import 'congratulations_state.dart';
 
 /// Congratulations画面のViewModel（Provider）
 final congratulationsViewModelProvider =
-    StateNotifierProvider<CongratulationsViewModel, CongratulationsState?>((
+    StateNotifierProvider<CongratulationsViewModel, CongratulationsState>((
       ref,
     ) {
       return CongratulationsViewModel();
     });
 
-/// Congratulations画面のビジネスロジックを管理
-class CongratulationsViewModel extends StateNotifier<CongratulationsState?> {
-  CongratulationsViewModel() : super(null);
+/// Congratulations画面のリソース管理Provider
+final congratulationsResourcesProvider = Provider<CongratulationsResources?>((
+  ref,
+) {
+  final viewModel = ref.watch(congratulationsViewModelProvider.notifier);
+  return viewModel.resources;
+});
 
-  /// 初期化
-  CongratulationsState initialize(TickerProvider vsync) {
-    // 既に初期化済みの場合は、アニメーションをリセットしてから返す
-    if (state != null) {
-      resetAnimations();
-      return state!;
+/// 初期化専用のProvider
+final congratulationsInitializerProvider = Provider<void>((ref) {
+  // このProviderは初期化のトリガーとして使用
+});
+
+/// Congratulations画面のビジネスロジックを管理
+class CongratulationsViewModel extends StateNotifier<CongratulationsState> {
+  CongratulationsResources? _resources;
+
+  CongratulationsViewModel() : super(const CongratulationsState());
+
+  /// リソースを取得
+  CongratulationsResources? get resources => _resources;
+
+  /// 初期化（リソース作成のみ）
+  CongratulationsResources initialize(TickerProvider vsync) {
+    // 既に初期化済みの場合は既存のリソースを返す
+    if (_resources != null) {
+      return _resources!;
     }
 
     // スケールアニメーションコントローラー
@@ -49,7 +66,7 @@ class CongratulationsViewModel extends StateNotifier<CongratulationsState?> {
           ..duration = composition.duration
           ..repeat();
 
-        // スケールアニメーションは遅延開始（画面遷移完了後0.4秒）
+        // スケールアニメーションは遅延開始（画面遷移完了後4秒）
         // ここでは開始しない
       },
     );
@@ -61,13 +78,13 @@ class CongratulationsViewModel extends StateNotifier<CongratulationsState?> {
       repeat: false,
       fit: BoxFit.cover,
       onLoaded: (composition) {
-        confettiController..duration = composition.duration;
+        confettiController.duration = composition.duration;
         // 遅延開始は後で設定
       },
     );
 
-    // 状態を作成してStateNotifierで管理
-    state = CongratulationsState(
+    // リソースを作成
+    _resources = CongratulationsResources(
       scaleController: scaleController,
       scaleAnimation: scaleAnimation,
       lottieController: lottieController,
@@ -76,17 +93,27 @@ class CongratulationsViewModel extends StateNotifier<CongratulationsState?> {
       confettiLottie: confettiLottie,
     );
 
-    // 画面遷移完了後4秒後にアニメーション開始
-    _startAnimationsWithDelay();
+    return _resources!;
+  }
 
-    return state!;
+  /// アニメーション開始（初期化後）
+  void startInitialization() {
+    if (_resources == null) return;
+
+    // 既に初期化済みの場合はリセット
+    if (state.isAnimationStarted) {
+      resetAnimations();
+    } else {
+      // 初回の場合は遅延開始
+      _startAnimationsWithDelay();
+    }
   }
 
   /// アニメーションを遅延開始
   void _startAnimationsWithDelay() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Future.delayed(const Duration(milliseconds: 4000), () {
-        if (state != null && state!.canReset) {
+        if (_resources != null && state.canReset) {
           startAnimations();
         }
       });
@@ -95,36 +122,36 @@ class CongratulationsViewModel extends StateNotifier<CongratulationsState?> {
 
   /// アニメーションを開始
   void startAnimations() {
-    if (state == null) return;
+    if (_resources == null) return;
 
     // 状態を更新：アニメーション開始フラグをON
-    state = state!.copyWith(
+    state = state.copyWith(
       isAnimationStarted: true,
       isScaleAnimating: true,
       isConfettiAnimating: true,
     );
 
     // スケールアニメーション開始
-    if (!state!.scaleController.isAnimating) {
-      state!.scaleController.forward();
+    if (!_resources!.scaleController.isAnimating) {
+      _resources!.scaleController.forward();
     }
 
     // 紙吹雪アニメーション開始
-    if (!state!.confettiController.isAnimating) {
-      state!.confettiController.forward();
+    if (!_resources!.confettiController.isAnimating) {
+      _resources!.confettiController.forward();
     }
   }
 
   /// アニメーションをリセット
   void resetAnimations() {
-    if (state == null) return;
+    if (_resources == null) return;
 
     // アニメーションコントローラーをリセット
-    state!.scaleController.reset();
-    state!.confettiController.reset();
+    _resources!.scaleController.reset();
+    _resources!.confettiController.reset();
 
     // 状態を更新：リセット状態に
-    state = state!.copyWith(
+    state = state.copyWith(
       isAnimationStarted: false,
       isScaleAnimating: false,
       isConfettiAnimating: false,
@@ -135,11 +162,14 @@ class CongratulationsViewModel extends StateNotifier<CongratulationsState?> {
     _startAnimationsWithDelay();
   }
 
+  /// アニメーション進行状況を更新
+  void updateAnimationProgress(double progress) {
+    state = state.copyWith(animationProgress: progress);
+  }
+
   /// アニメーション完了時の処理
   void onAnimationComplete() {
-    if (state == null) return;
-
-    state = state!.copyWith(
+    state = state.copyWith(
       isScaleAnimating: false,
       isConfettiAnimating: false,
       animationProgress: 1.0,
@@ -149,7 +179,7 @@ class CongratulationsViewModel extends StateNotifier<CongratulationsState?> {
   /// リソースの解放
   @override
   void dispose() {
-    state?.dispose();
+    _resources?.dispose();
     super.dispose();
   }
 }

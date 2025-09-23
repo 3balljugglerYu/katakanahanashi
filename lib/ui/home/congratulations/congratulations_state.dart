@@ -3,16 +3,10 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'congratulations_state.freezed.dart';
 
-/// Congratulations画面の状態定義
+/// Congratulations画面の純粋な状態定義（Freezedで管理）
 @freezed
 class CongratulationsState with _$CongratulationsState {
   const factory CongratulationsState({
-    required AnimationController scaleController,
-    required Animation<double> scaleAnimation,
-    required AnimationController lottieController,
-    required Widget congratsLottie,
-    required AnimationController confettiController,
-    required Widget confettiLottie,
     @Default(false) bool isAnimationStarted,
     @Default(false) bool isScaleAnimating,
     @Default(false) bool isConfettiAnimating,
@@ -24,14 +18,33 @@ class CongratulationsState with _$CongratulationsState {
   /// アニメーションが実行中かどうか
   bool get isAnimating => isScaleAnimating || isConfettiAnimating;
 
-  /// スケールアニメーションの現在値
-  double get scaleValue => scaleAnimation.value;
-
   /// アニメーションが初期状態かどうか
   bool get isInitialState => !isAnimationStarted;
 
   /// アニメーションをリセットできる状態かどうか
   bool get canReset => !isAnimating;
+
+  /// アニメーションが完了したかどうか
+  bool get isCompleted => animationProgress >= 1.0;
+}
+
+/// Congratulations画面のリソース管理クラス
+class CongratulationsResources {
+  final AnimationController scaleController;
+  final Animation<double> scaleAnimation;
+  final AnimationController lottieController;
+  final Widget congratsLottie;
+  final AnimationController confettiController;
+  final Widget confettiLottie;
+
+  const CongratulationsResources({
+    required this.scaleController,
+    required this.scaleAnimation,
+    required this.lottieController,
+    required this.congratsLottie,
+    required this.confettiController,
+    required this.confettiLottie,
+  });
 
   /// リソースの解放
   void dispose() {

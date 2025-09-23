@@ -15,33 +15,38 @@ class CongratulationsPage extends ConsumerStatefulWidget {
 class _CongratulationsPageState extends ConsumerState<CongratulationsPage>
     with TickerProviderStateMixin {
   late final CongratulationsViewModel _viewModel;
-  CongratulationsState? _initializedState;
 
   @override
   void initState() {
     super.initState();
     _viewModel = ref.read(congratulationsViewModelProvider.notifier);
-    _initializedState = _viewModel.initialize(this);
+    // リソース初期化（状態変更なし）
+    _viewModel.initialize(this);
+    // 遅延実行でアニメーション開始
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _viewModel.startInitialization();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     // StateNotifierの状態を監視
-    final currentState = ref.watch(congratulationsViewModelProvider);
-    final displayState = currentState ?? _initializedState;
+    final state = ref.watch(congratulationsViewModelProvider);
+    final resources = ref.watch(congratulationsResourcesProvider);
 
-    if (displayState == null) {
+    if (resources == null) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
-    return _CongratulationsContent(state: displayState);
+    return _CongratulationsContent(state: state, resources: resources);
   }
 }
 
 class _CongratulationsContent extends StatelessWidget {
   final CongratulationsState state;
+  final CongratulationsResources resources;
 
-  const _CongratulationsContent({required this.state});
+  const _CongratulationsContent({required this.state, required this.resources});
 
   @override
   Widget build(BuildContext context) {
@@ -56,7 +61,7 @@ class _CongratulationsContent extends StatelessWidget {
           clipBehavior: Clip.none,
           children: [
             // 背景：紙吹雪
-            Positioned.fill(child: state.confettiLottie),
+            Positioned.fill(child: resources.confettiLottie),
 
             // 中央の Congratulations をシンプルに拡大
             Positioned(
@@ -65,11 +70,11 @@ class _CongratulationsContent extends StatelessWidget {
               right: 0,
               child: Center(
                 child: ScaleTransition(
-                  scale: state.scaleAnimation,
+                  scale: resources.scaleAnimation,
                   alignment: Alignment.center,
                   child: SizedBox(
                     width: baseWidth,
-                    child: state.congratsLottie,
+                    child: resources.congratsLottie,
                   ),
                 ),
               ),
