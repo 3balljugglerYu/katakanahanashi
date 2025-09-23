@@ -86,17 +86,19 @@ class _CongratulationsContent extends StatelessWidget {
             ),
 
             // 画面の真ん中にロケット猫アニメーション
-            Positioned(
-              top: size.height * 0.5 - 200, // 画面の真ん中から少し上
-              left: 0,
-              right: 0,
-              child: Center(
-                child: SizedBox(
-                  width: 400,
-                  height: 400,
-                  child: resources.rocketLottie,
-                ),
-              ),
+            AnimatedBuilder(
+              animation: resources.rocketPositionAnimation,
+              builder: (context, child) {
+                return Positioned(
+                  top: size.height * resources.rocketPositionAnimation.value.dy,
+                  left: size.width * resources.rocketPositionAnimation.value.dx,
+                  child: SizedBox(
+                    width: 400,
+                    height: 400,
+                    child: resources.rocketLottie,
+                  ),
+                );
+              },
             ),
             Positioned(
               bottom: 100,

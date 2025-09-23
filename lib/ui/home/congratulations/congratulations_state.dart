@@ -34,6 +34,8 @@ class CongratulationsResources {
   final Animation<double> scaleAnimation;
   final AnimationController positionController;
   final Animation<double> positionAnimation;
+  final AnimationController rocketPositionController;
+  final Animation<Offset> rocketPositionAnimation;
   final AnimationController lottieController;
   final Widget congratsLottie;
   final AnimationController confettiController;
@@ -46,6 +48,8 @@ class CongratulationsResources {
     required this.scaleAnimation,
     required this.positionController,
     required this.positionAnimation,
+    required this.rocketPositionController,
+    required this.rocketPositionAnimation,
     required this.lottieController,
     required this.congratsLottie,
     required this.confettiController,
@@ -58,6 +62,7 @@ class CongratulationsResources {
   void dispose() {
     scaleController.dispose();
     positionController.dispose();
+    rocketPositionController.dispose();
     lottieController.dispose();
     confettiController.dispose();
     rocketController.dispose();

@@ -65,6 +65,22 @@ class CongratulationsViewModel extends StateNotifier<CongratulationsState> {
           CurvedAnimation(parent: positionController, curve: Curves.easeInOut),
         );
 
+    // ロケット猫の飛び込みアニメーション（2秒後に左下から右上へ）
+    final rocketPositionController = AnimationController(
+      duration: const Duration(milliseconds: 1500),
+      vsync: vsync,
+    );
+    final rocketPositionAnimation =
+        Tween<Offset>(
+          begin: const Offset(-0.5, 1.2), // 画面外左下（-50%, 120%）
+          end: const Offset(0.0, 0.25), // 画面中央（0%, 50%）
+        ).animate(
+          CurvedAnimation(
+            parent: rocketPositionController,
+            curve: Curves.easeOutCubic,
+          ),
+        );
+
     // Lottieコントローラー
     final lottieController = AnimationController(vsync: vsync);
     final confettiController = AnimationController(vsync: vsync);
@@ -112,6 +128,8 @@ class CongratulationsViewModel extends StateNotifier<CongratulationsState> {
       scaleAnimation: scaleAnimation,
       positionController: positionController,
       positionAnimation: positionAnimation,
+      rocketPositionController: rocketPositionController,
+      rocketPositionAnimation: rocketPositionAnimation,
       lottieController: lottieController,
       congratsLottie: congratsLottie,
       confettiController: confettiController,
@@ -184,6 +202,14 @@ class CongratulationsViewModel extends StateNotifier<CongratulationsState> {
         _resources!.positionController.forward();
       }
     });
+
+    // 2秒後にロケット猫の飛び込みアニメーション開始
+    Future.delayed(const Duration(milliseconds: 2000), () {
+      if (_resources != null &&
+          !_resources!.rocketPositionController.isAnimating) {
+        _resources!.rocketPositionController.forward();
+      }
+    });
   }
 
   /// アニメーションをリセット
@@ -193,6 +219,7 @@ class CongratulationsViewModel extends StateNotifier<CongratulationsState> {
     // アニメーションコントローラーをリセット
     _resources!.scaleController.reset();
     _resources!.positionController.reset();
+    _resources!.rocketPositionController.reset();
     _resources!.lottieController.stop();
     _resources!.confettiController.reset();
     _resources!.rocketController.reset();
