@@ -12,6 +12,11 @@ class CongratulationsState with _$CongratulationsState {
     @Default(false) bool isConfettiAnimating,
     @Default(false) bool isRocketVisible,
     @Default(0.0) double animationProgress,
+    // 段階的初期化用フィールド
+    @Default(false) bool isControllersReady,
+    @Default(false) bool isCongratsReady,
+    @Default(false) bool isConfettiReady,
+    @Default(false) bool isRocketReady,
   }) = _CongratulationsState;
 
   const CongratulationsState._();
@@ -27,6 +32,19 @@ class CongratulationsState with _$CongratulationsState {
 
   /// アニメーションが完了したかどうか
   bool get isCompleted => animationProgress >= 1.0;
+
+  /// 基本リソース（コントローラー）が準備完了かどうか
+  bool get canShowBasicUI => isControllersReady;
+
+  /// Congratulationsアニメーションが表示可能かどうか
+  bool get canShowCongrats => isControllersReady && isCongratsReady;
+
+  /// 紙吹雪アニメーションが表示可能かどうか
+  bool get canShowConfetti => isControllersReady && isConfettiReady;
+
+  /// ロケット猫アニメーションが表示可能かどうか
+  bool get canShowRocket =>
+      isControllersReady && isRocketReady && isRocketVisible;
 }
 
 /// Congratulations画面のリソース管理クラス

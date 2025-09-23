@@ -15,7 +15,10 @@ final congratulationsViewModelProvider =
 final congratulationsResourcesProvider = Provider<CongratulationsResources?>((
   ref,
 ) {
+  // StateNotifierの状態変化を監視してProviderを再評価
+  ref.watch(congratulationsViewModelProvider);
   final viewModel = ref.watch(congratulationsViewModelProvider.notifier);
+
   return viewModel.resources;
 });
 
@@ -33,7 +36,25 @@ class CongratulationsViewModel extends StateNotifier<CongratulationsState> {
   /// リソースを取得
   CongratulationsResources? get resources => _resources;
 
-  /// 初期化（リソース作成のみ）
+  /// 軽量初期化（アニメーションコントローラーのみ作成）
+  void initializeLightweight(TickerProvider vsync) {
+    // 初期化時に状態を完全にリセット（2回目以降の表示対応）
+    _forceResetState();
+
+    // 既に初期化済みの場合は早期リターン
+    if (_resources != null) {
+      state = state.copyWith(isControllersReady: true);
+      return;
+    }
+
+    // 軽量リソース（アニメーションコントローラー）のみ作成
+    _createControllers(vsync);
+
+    // コントローラー準備完了を通知
+    state = state.copyWith(isControllersReady: true);
+  }
+
+  /// 従来の初期化（後方互換性のため保持）
   CongratulationsResources initialize(TickerProvider vsync) {
     // 初期化時に状態を完全にリセット（2回目以降の表示対応）
     _forceResetState();
@@ -84,10 +105,19 @@ class CongratulationsViewModel extends StateNotifier<CongratulationsState> {
           ),
         );
 
-    // Lottieコントローラー
-    final lottieController = AnimationController(vsync: vsync);
-    final confettiController = AnimationController(vsync: vsync);
-    final rocketController = AnimationController(vsync: vsync);
+    // Lottieコントローラー（初期durationを設定してrepeat()エラーを防止）
+    final lottieController = AnimationController(
+      duration: const Duration(seconds: 3), // デフォルト値（onLoadedで上書き）
+      vsync: vsync,
+    );
+    final confettiController = AnimationController(
+      duration: const Duration(seconds: 2), // デフォルト値（onLoadedで上書き）
+      vsync: vsync,
+    );
+    final rocketController = AnimationController(
+      duration: const Duration(seconds: 2), // デフォルト値（onLoadedで上書き）
+      vsync: vsync,
+    );
 
     // Congratulations Lottieアニメーション
     final congratsLottie = LottieBuilder.asset(
@@ -142,6 +172,202 @@ class CongratulationsViewModel extends StateNotifier<CongratulationsState> {
     );
 
     return _resources!;
+  }
+
+  /// アニメーションコントローラーのみ作成（軽量）
+  void _createControllers(TickerProvider vsync) {
+    // スケールアニメーションコントローラー
+    final scaleController = AnimationController(
+      duration: const Duration(milliseconds: 5000),
+      vsync: vsync,
+    );
+
+    // スケールアニメーション
+    final scaleAnimation = CurvedAnimation(
+      parent: scaleController,
+      curve: Curves.elasticOut,
+    ).drive(Tween(begin: 0.3, end: 1.0));
+
+    // 位置移動アニメーション（2秒後に上に移動）
+    final positionController = AnimationController(
+      duration: const Duration(milliseconds: 1000),
+      vsync: vsync,
+    );
+    final positionAnimation =
+        Tween<double>(
+          begin: 0.40, // 画面の40%の位置
+          end: 0.2, // 画面の20%の位置
+        ).animate(
+          CurvedAnimation(parent: positionController, curve: Curves.easeInOut),
+        );
+
+    // ロケット猫の飛び込みアニメーション（2秒後に左下から右上へ）
+    final rocketPositionController = AnimationController(
+      duration: const Duration(milliseconds: 1500),
+      vsync: vsync,
+    );
+    final rocketPositionAnimation =
+        Tween<Offset>(
+          begin: const Offset(-1.0, 0.8), // 画面外左下（-100%, 120%）
+          end: const Offset(0.0, 0.5), // 画面中央（0%, 50%）
+        ).animate(
+          CurvedAnimation(
+            parent: rocketPositionController,
+            curve: Curves.easeOutCubic,
+          ),
+        );
+
+    // Lottieコントローラー（初期durationを設定してrepeat()エラーを防止）
+    final lottieController = AnimationController(
+      duration: const Duration(seconds: 3), // デフォルト値（onLoadedで上書き）
+      vsync: vsync,
+    );
+    final confettiController = AnimationController(
+      duration: const Duration(seconds: 2), // デフォルト値（onLoadedで上書き）
+      vsync: vsync,
+    );
+    final rocketController = AnimationController(
+      duration: const Duration(seconds: 2), // デフォルト値（onLoadedで上書き）
+      vsync: vsync,
+    );
+
+    // 仮のLottieウィジェット（後で段階的に差し替え）
+    final placeholderWidget = Container();
+
+    // 軽量リソースを作成（LottieはプレースホルダーでCPU負荷なし）
+    _resources = CongratulationsResources(
+      scaleController: scaleController,
+      scaleAnimation: scaleAnimation,
+      positionController: positionController,
+      positionAnimation: positionAnimation,
+      rocketPositionController: rocketPositionController,
+      rocketPositionAnimation: rocketPositionAnimation,
+      lottieController: lottieController,
+      congratsLottie: placeholderWidget,
+      confettiController: confettiController,
+      confettiLottie: placeholderWidget,
+      rocketController: rocketController,
+      rocketLottie: placeholderWidget,
+    );
+  }
+
+  /// 段階的リソース読み込み開始
+  Future<void> loadResourcesGradually() async {
+    if (_resources == null) return;
+
+    // フェーズ1: Congratulations Lottie（最優先）
+    await _loadCongratsLottie();
+
+    // フェーズ2: 紙吹雪 Lottie（中優先）
+    await Future.microtask(() => _loadConfettiLottie());
+
+    // フェーズ3: ロケット猫 Lottie（低優先・遅延）
+    await Future.microtask(() => _loadRocketLottie());
+  }
+
+  /// Congratulations Lottie読み込み
+  Future<void> _loadCongratsLottie() async {
+    if (_resources == null) return;
+
+    await Future.microtask(() {
+      final congratsLottie = LottieBuilder.asset(
+        'assets/animations/Congratulations.json',
+        controller: _resources!.lottieController,
+        repeat: false,
+        fit: BoxFit.contain,
+        onLoaded: (composition) {
+          _resources!.lottieController.duration = composition.duration;
+        },
+      );
+
+      // リソースを更新
+      _resources = CongratulationsResources(
+        scaleController: _resources!.scaleController,
+        scaleAnimation: _resources!.scaleAnimation,
+        positionController: _resources!.positionController,
+        positionAnimation: _resources!.positionAnimation,
+        rocketPositionController: _resources!.rocketPositionController,
+        rocketPositionAnimation: _resources!.rocketPositionAnimation,
+        lottieController: _resources!.lottieController,
+        congratsLottie: congratsLottie,
+        confettiController: _resources!.confettiController,
+        confettiLottie: _resources!.confettiLottie,
+        rocketController: _resources!.rocketController,
+        rocketLottie: _resources!.rocketLottie,
+      );
+
+      state = state.copyWith(isCongratsReady: true);
+    });
+  }
+
+  /// 紙吹雪 Lottie読み込み
+  Future<void> _loadConfettiLottie() async {
+    if (_resources == null) return;
+
+    await Future.microtask(() {
+      final confettiLottie = LottieBuilder.asset(
+        'assets/animations/confetti on transparent background.json',
+        controller: _resources!.confettiController,
+        repeat: false,
+        fit: BoxFit.cover,
+        onLoaded: (composition) {
+          _resources!.confettiController.duration = composition.duration;
+        },
+      );
+
+      // リソースを更新
+      _resources = CongratulationsResources(
+        scaleController: _resources!.scaleController,
+        scaleAnimation: _resources!.scaleAnimation,
+        positionController: _resources!.positionController,
+        positionAnimation: _resources!.positionAnimation,
+        rocketPositionController: _resources!.rocketPositionController,
+        rocketPositionAnimation: _resources!.rocketPositionAnimation,
+        lottieController: _resources!.lottieController,
+        congratsLottie: _resources!.congratsLottie,
+        confettiController: _resources!.confettiController,
+        confettiLottie: confettiLottie,
+        rocketController: _resources!.rocketController,
+        rocketLottie: _resources!.rocketLottie,
+      );
+
+      state = state.copyWith(isConfettiReady: true);
+    });
+  }
+
+  /// ロケット猫 Lottie読み込み
+  Future<void> _loadRocketLottie() async {
+    if (_resources == null) return;
+
+    await Future.microtask(() {
+      final rocketLottie = LottieBuilder.asset(
+        'assets/animations/Cat in a rocket.json',
+        controller: _resources!.rocketController,
+        repeat: false,
+        fit: BoxFit.contain,
+        onLoaded: (composition) {
+          _resources!.rocketController.duration = composition.duration;
+        },
+      );
+
+      // リソースを更新
+      _resources = CongratulationsResources(
+        scaleController: _resources!.scaleController,
+        scaleAnimation: _resources!.scaleAnimation,
+        positionController: _resources!.positionController,
+        positionAnimation: _resources!.positionAnimation,
+        rocketPositionController: _resources!.rocketPositionController,
+        rocketPositionAnimation: _resources!.rocketPositionAnimation,
+        lottieController: _resources!.lottieController,
+        congratsLottie: _resources!.congratsLottie,
+        confettiController: _resources!.confettiController,
+        confettiLottie: _resources!.confettiLottie,
+        rocketController: _resources!.rocketController,
+        rocketLottie: rocketLottie,
+      );
+
+      state = state.copyWith(isRocketReady: true);
+    });
   }
 
   /// アニメーション開始（初期化後）
@@ -201,8 +427,9 @@ class CongratulationsViewModel extends StateNotifier<CongratulationsState> {
       _resources!.scaleController.forward();
     }
 
-    // Congratulations Lottieアニメーション開始
-    if (!_resources!.lottieController.isAnimating) {
+    // Congratulations Lottieアニメーション開始（durationチェック付き）
+    if (!_resources!.lottieController.isAnimating &&
+        _resources!.lottieController.duration != null) {
       _resources!.lottieController.repeat();
     }
 
@@ -231,8 +458,9 @@ class CongratulationsViewModel extends StateNotifier<CongratulationsState> {
           !_resources!.rocketPositionController.isAnimating) {
         // ロケット猫のアニメーションを開始
         _resources!.rocketPositionController.forward();
-        // ロケット猫のLottieアニメーションも開始（遅延開始でリソース節約）
-        if (!_resources!.rocketController.isAnimating) {
+        // ロケット猫のLottieアニメーションも開始（遅延開始でリソース節約、durationチェック付き）
+        if (!_resources!.rocketController.isAnimating &&
+            _resources!.rocketController.duration != null) {
           _resources!.rocketController.repeat();
         }
       }
@@ -278,8 +506,19 @@ class CongratulationsViewModel extends StateNotifier<CongratulationsState> {
     );
   }
 
-  /// 画面破棄時の完全リセット
+  /// 画面破棄時の完全リセット（状態変更は遅延実行で安全に）
   void resetForDispose() {
+    // リソースのみ即座に解放（状態変更なし）
+    disposeResourcesOnly();
+
+    // 状態リセットは遅延実行（Riverpodルール遵守）
+    Future.microtask(() {
+      _forceResetState();
+    });
+  }
+
+  /// リソースのみ解放（状態変更なし）- 外部からも呼び出し可能
+  void disposeResourcesOnly() {
     if (_resources != null) {
       // アニメーションを完全停止
       _resources!.scaleController.stop();
@@ -297,9 +536,6 @@ class CongratulationsViewModel extends StateNotifier<CongratulationsState> {
       _resources!.confettiController.reset();
       _resources!.rocketController.reset();
     }
-
-    // 状態を初期状態に完全リセット
-    _forceResetState();
   }
 
   /// 状態の強制リセット（内部用）
@@ -310,6 +546,11 @@ class CongratulationsViewModel extends StateNotifier<CongratulationsState> {
       isConfettiAnimating: false,
       isRocketVisible: false,
       animationProgress: 0.0,
+      // 段階的初期化フィールドもリセット
+      isControllersReady: false,
+      isCongratsReady: false,
+      isConfettiReady: false,
+      isRocketReady: false,
     );
   }
 

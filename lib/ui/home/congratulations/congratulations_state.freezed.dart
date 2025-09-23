@@ -21,7 +21,12 @@ mixin _$CongratulationsState {
   bool get isScaleAnimating => throw _privateConstructorUsedError;
   bool get isConfettiAnimating => throw _privateConstructorUsedError;
   bool get isRocketVisible => throw _privateConstructorUsedError;
-  double get animationProgress => throw _privateConstructorUsedError;
+  double get animationProgress =>
+      throw _privateConstructorUsedError; // 段階的初期化用フィールド
+  bool get isControllersReady => throw _privateConstructorUsedError;
+  bool get isCongratsReady => throw _privateConstructorUsedError;
+  bool get isConfettiReady => throw _privateConstructorUsedError;
+  bool get isRocketReady => throw _privateConstructorUsedError;
 
   /// Create a copy of CongratulationsState
   /// with the given fields replaced by the non-null parameter values.
@@ -43,6 +48,10 @@ abstract class $CongratulationsStateCopyWith<$Res> {
     bool isConfettiAnimating,
     bool isRocketVisible,
     double animationProgress,
+    bool isControllersReady,
+    bool isCongratsReady,
+    bool isConfettiReady,
+    bool isRocketReady,
   });
 }
 
@@ -69,6 +78,10 @@ class _$CongratulationsStateCopyWithImpl<
     Object? isConfettiAnimating = null,
     Object? isRocketVisible = null,
     Object? animationProgress = null,
+    Object? isControllersReady = null,
+    Object? isCongratsReady = null,
+    Object? isConfettiReady = null,
+    Object? isRocketReady = null,
   }) {
     return _then(
       _value.copyWith(
@@ -92,6 +105,22 @@ class _$CongratulationsStateCopyWithImpl<
                 ? _value.animationProgress
                 : animationProgress // ignore: cast_nullable_to_non_nullable
                       as double,
+            isControllersReady: null == isControllersReady
+                ? _value.isControllersReady
+                : isControllersReady // ignore: cast_nullable_to_non_nullable
+                      as bool,
+            isCongratsReady: null == isCongratsReady
+                ? _value.isCongratsReady
+                : isCongratsReady // ignore: cast_nullable_to_non_nullable
+                      as bool,
+            isConfettiReady: null == isConfettiReady
+                ? _value.isConfettiReady
+                : isConfettiReady // ignore: cast_nullable_to_non_nullable
+                      as bool,
+            isRocketReady: null == isRocketReady
+                ? _value.isRocketReady
+                : isRocketReady // ignore: cast_nullable_to_non_nullable
+                      as bool,
           )
           as $Val,
     );
@@ -113,6 +142,10 @@ abstract class _$$CongratulationsStateImplCopyWith<$Res>
     bool isConfettiAnimating,
     bool isRocketVisible,
     double animationProgress,
+    bool isControllersReady,
+    bool isCongratsReady,
+    bool isConfettiReady,
+    bool isRocketReady,
   });
 }
 
@@ -135,6 +168,10 @@ class __$$CongratulationsStateImplCopyWithImpl<$Res>
     Object? isConfettiAnimating = null,
     Object? isRocketVisible = null,
     Object? animationProgress = null,
+    Object? isControllersReady = null,
+    Object? isCongratsReady = null,
+    Object? isConfettiReady = null,
+    Object? isRocketReady = null,
   }) {
     return _then(
       _$CongratulationsStateImpl(
@@ -158,6 +195,22 @@ class __$$CongratulationsStateImplCopyWithImpl<$Res>
             ? _value.animationProgress
             : animationProgress // ignore: cast_nullable_to_non_nullable
                   as double,
+        isControllersReady: null == isControllersReady
+            ? _value.isControllersReady
+            : isControllersReady // ignore: cast_nullable_to_non_nullable
+                  as bool,
+        isCongratsReady: null == isCongratsReady
+            ? _value.isCongratsReady
+            : isCongratsReady // ignore: cast_nullable_to_non_nullable
+                  as bool,
+        isConfettiReady: null == isConfettiReady
+            ? _value.isConfettiReady
+            : isConfettiReady // ignore: cast_nullable_to_non_nullable
+                  as bool,
+        isRocketReady: null == isRocketReady
+            ? _value.isRocketReady
+            : isRocketReady // ignore: cast_nullable_to_non_nullable
+                  as bool,
       ),
     );
   }
@@ -172,6 +225,10 @@ class _$CongratulationsStateImpl extends _CongratulationsState {
     this.isConfettiAnimating = false,
     this.isRocketVisible = false,
     this.animationProgress = 0.0,
+    this.isControllersReady = false,
+    this.isCongratsReady = false,
+    this.isConfettiReady = false,
+    this.isRocketReady = false,
   }) : super._();
 
   @override
@@ -189,10 +246,23 @@ class _$CongratulationsStateImpl extends _CongratulationsState {
   @override
   @JsonKey()
   final double animationProgress;
+  // 段階的初期化用フィールド
+  @override
+  @JsonKey()
+  final bool isControllersReady;
+  @override
+  @JsonKey()
+  final bool isCongratsReady;
+  @override
+  @JsonKey()
+  final bool isConfettiReady;
+  @override
+  @JsonKey()
+  final bool isRocketReady;
 
   @override
   String toString() {
-    return 'CongratulationsState(isAnimationStarted: $isAnimationStarted, isScaleAnimating: $isScaleAnimating, isConfettiAnimating: $isConfettiAnimating, isRocketVisible: $isRocketVisible, animationProgress: $animationProgress)';
+    return 'CongratulationsState(isAnimationStarted: $isAnimationStarted, isScaleAnimating: $isScaleAnimating, isConfettiAnimating: $isConfettiAnimating, isRocketVisible: $isRocketVisible, animationProgress: $animationProgress, isControllersReady: $isControllersReady, isCongratsReady: $isCongratsReady, isConfettiReady: $isConfettiReady, isRocketReady: $isRocketReady)';
   }
 
   @override
@@ -209,7 +279,15 @@ class _$CongratulationsStateImpl extends _CongratulationsState {
             (identical(other.isRocketVisible, isRocketVisible) ||
                 other.isRocketVisible == isRocketVisible) &&
             (identical(other.animationProgress, animationProgress) ||
-                other.animationProgress == animationProgress));
+                other.animationProgress == animationProgress) &&
+            (identical(other.isControllersReady, isControllersReady) ||
+                other.isControllersReady == isControllersReady) &&
+            (identical(other.isCongratsReady, isCongratsReady) ||
+                other.isCongratsReady == isCongratsReady) &&
+            (identical(other.isConfettiReady, isConfettiReady) ||
+                other.isConfettiReady == isConfettiReady) &&
+            (identical(other.isRocketReady, isRocketReady) ||
+                other.isRocketReady == isRocketReady));
   }
 
   @override
@@ -220,6 +298,10 @@ class _$CongratulationsStateImpl extends _CongratulationsState {
     isConfettiAnimating,
     isRocketVisible,
     animationProgress,
+    isControllersReady,
+    isCongratsReady,
+    isConfettiReady,
+    isRocketReady,
   );
 
   /// Create a copy of CongratulationsState
@@ -242,6 +324,10 @@ abstract class _CongratulationsState extends CongratulationsState {
     final bool isConfettiAnimating,
     final bool isRocketVisible,
     final double animationProgress,
+    final bool isControllersReady,
+    final bool isCongratsReady,
+    final bool isConfettiReady,
+    final bool isRocketReady,
   }) = _$CongratulationsStateImpl;
   const _CongratulationsState._() : super._();
 
@@ -254,7 +340,15 @@ abstract class _CongratulationsState extends CongratulationsState {
   @override
   bool get isRocketVisible;
   @override
-  double get animationProgress;
+  double get animationProgress; // 段階的初期化用フィールド
+  @override
+  bool get isControllersReady;
+  @override
+  bool get isCongratsReady;
+  @override
+  bool get isConfettiReady;
+  @override
+  bool get isRocketReady;
 
   /// Create a copy of CongratulationsState
   /// with the given fields replaced by the non-null parameter values.
