@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:lottie/lottie.dart';
+import '../../../data/services/lottie_cache_service.dart';
 import 'congratulations_state.dart';
 
 /// Congratulations画面のViewModel（Provider）
@@ -119,40 +120,28 @@ class CongratulationsViewModel extends StateNotifier<CongratulationsState> {
       vsync: vsync,
     );
 
-    // Congratulations Lottieアニメーション
-    final congratsLottie = LottieBuilder.asset(
+    // Congratulations Lottieアニメーション（キャッシュサービス使用）
+    final congratsLottie = LottieCacheService().getCachedLottie(
       'assets/animations/Congratulations.json',
       controller: lottieController,
       repeat: false, // 自動再生しない
       fit: BoxFit.contain,
-      onLoaded: (composition) {
-        lottieController.duration = composition.duration;
-        // 遅延開始は後で設定
-      },
     );
 
-    // 背景紙吹雪 Lottieアニメーション
-    final confettiLottie = LottieBuilder.asset(
+    // 背景紙吹雪 Lottieアニメーション（キャッシュサービス使用）
+    final confettiLottie = LottieCacheService().getCachedLottie(
       'assets/animations/confetti on transparent background.json',
       controller: confettiController,
       repeat: false,
       fit: BoxFit.cover,
-      onLoaded: (composition) {
-        confettiController.duration = composition.duration;
-        // 遅延開始は後で設定
-      },
     );
 
-    // ロケット猫 Lottieアニメーション
-    final rocketLottie = LottieBuilder.asset(
+    // ロケット猫 Lottieアニメーション（キャッシュサービス使用）
+    final rocketLottie = LottieCacheService().getCachedLottie(
       'assets/animations/Cat in a rocket.json',
       controller: rocketController,
       repeat: false,
       fit: BoxFit.contain,
-      onLoaded: (composition) {
-        rocketController.duration = composition.duration;
-        // 遅延開始は後で設定
-      },
     );
 
     // リソースを作成
@@ -270,14 +259,12 @@ class CongratulationsViewModel extends StateNotifier<CongratulationsState> {
     if (_resources == null) return;
 
     await Future.microtask(() {
-      final congratsLottie = LottieBuilder.asset(
+      // キャッシュサービスから高速取得
+      final congratsLottie = LottieCacheService().getCachedLottie(
         'assets/animations/Congratulations.json',
         controller: _resources!.lottieController,
         repeat: false,
         fit: BoxFit.contain,
-        onLoaded: (composition) {
-          _resources!.lottieController.duration = composition.duration;
-        },
       );
 
       // リソースを更新
@@ -305,14 +292,12 @@ class CongratulationsViewModel extends StateNotifier<CongratulationsState> {
     if (_resources == null) return;
 
     await Future.microtask(() {
-      final confettiLottie = LottieBuilder.asset(
+      // キャッシュサービスから高速取得
+      final confettiLottie = LottieCacheService().getCachedLottie(
         'assets/animations/confetti on transparent background.json',
         controller: _resources!.confettiController,
         repeat: false,
         fit: BoxFit.cover,
-        onLoaded: (composition) {
-          _resources!.confettiController.duration = composition.duration;
-        },
       );
 
       // リソースを更新
@@ -340,14 +325,12 @@ class CongratulationsViewModel extends StateNotifier<CongratulationsState> {
     if (_resources == null) return;
 
     await Future.microtask(() {
-      final rocketLottie = LottieBuilder.asset(
+      // キャッシュサービスから高速取得
+      final rocketLottie = LottieCacheService().getCachedLottie(
         'assets/animations/Cat in a rocket.json',
         controller: _resources!.rocketController,
         repeat: false,
         fit: BoxFit.contain,
-        onLoaded: (composition) {
-          _resources!.rocketController.duration = composition.duration;
-        },
       );
 
       // リソースを更新
