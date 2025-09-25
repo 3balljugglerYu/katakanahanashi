@@ -1,8 +1,8 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:katakanahanashi/data/services/ad_service.dart';
 import 'package:katakanahanashi/navigator/app_router.dart';
 import 'package:katakanahanashi/ui/home/game/game_page.dart';
 
@@ -13,25 +13,8 @@ class AdDisplayPage extends StatefulWidget {
   State<AdDisplayPage> createState() => _AdDisplayPageState();
 }
 
-class _AdDisplayPageState extends State<AdDisplayPage> with TickerProviderStateMixin {
-  // プラットフォーム別の広告ユニットIDを取得
-  static String get _interstitialAdUnitId {
-    if (Platform.isIOS) {
-      // iOS
-      // テスト用: 'ca-app-pub-3940256099942544/4411468910'
-      // 本番用: 'ca-app-pub-2716829166250639/9936269880'
-      return 'ca-app-pub-3940256099942544/4411468910';
-    } else if (Platform.isAndroid) {
-      // Android
-      // テスト用: 'ca-app-pub-3940256099942544/1033173712'
-      // 本番用: 'ca-app-pub-2716829166250639/3387528627'
-      return 'ca-app-pub-3940256099942544/1033173712';
-    } else {
-      // その他のプラットフォーム（テスト用）
-      return 'ca-app-pub-3940256099942544/4411468910';
-    }
-  }
-
+class _AdDisplayPageState extends State<AdDisplayPage>
+    with TickerProviderStateMixin {
   InterstitialAd? _interstitialAd;
   bool _adLoaded = false;
   bool _showCloseButton = false;
@@ -88,8 +71,9 @@ class _AdDisplayPageState extends State<AdDisplayPage> with TickerProviderStateM
     }
 
     // 事前読み込み済み広告がない場合は通常の読み込み
+    AdService.logAdInfo(); // デバッグ情報出力
     InterstitialAd.load(
-      adUnitId: _interstitialAdUnitId,
+      adUnitId: AdService.interstitialAdUnitId,
       request: const AdRequest(),
       adLoadCallback: InterstitialAdLoadCallback(
         onAdLoaded: (InterstitialAd ad) {
@@ -178,18 +162,11 @@ class _AdDisplayPageState extends State<AdDisplayPage> with TickerProviderStateM
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
-                    Icons.ads_click,
-                    size: 64,
-                    color: Colors.grey,
-                  ),
+                  Icon(Icons.ads_click, size: 64, color: Colors.grey),
                   const SizedBox(height: 16),
                   const Text(
                     '広告表示中...',
-                    style: TextStyle(
-                      fontSize: 18,
-                      color: Colors.grey,
-                    ),
+                    style: TextStyle(fontSize: 18, color: Colors.grey),
                   ),
                 ],
               ),
@@ -211,11 +188,7 @@ class _AdDisplayPageState extends State<AdDisplayPage> with TickerProviderStateM
               left: 16,
               child: GestureDetector(
                 onTap: _navigateToTop,
-                child: const Icon(
-                  Icons.close,
-                  color: Colors.white38,
-                  size: 32,
-                ),
+                child: const Icon(Icons.close, color: Colors.white38, size: 32),
               ),
             ),
         ],
