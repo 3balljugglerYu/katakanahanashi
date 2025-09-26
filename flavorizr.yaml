@@ -1,0 +1,24 @@
+flavors:
+  production:
+    app:
+      name: "ことばかくれんぼ"
+    android:
+      applicationId: "com.kotoba.kakurenbo"
+    ios:
+      bundleId: "com.kotoba.kakurenbo"
+
+  staging:
+    app:
+      name: "ことばかくれんぼ (Stg)"
+    android:
+      applicationId: "com.kotoba.kakurenbo.stg"
+    ios:
+      bundleId: "com.kotoba.kakurenbo.stg"
+
+  development:
+    app:
+      name: "ことばかくれんぼ (Dev)"
+    android:
+      applicationId: "com.kotoba.kakurenbo.dev"
+    ios:
+      bundleId: "com.kotoba.kakurenbo.dev"
