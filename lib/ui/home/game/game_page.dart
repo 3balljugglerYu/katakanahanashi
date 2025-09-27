@@ -216,7 +216,7 @@ class GamePage extends ConsumerWidget {
               ),
             ),
 
-            SizedBox(height: MediaQuery.of(context).size.height * 0.05),
+            SizedBox(height: MediaQuery.of(context).size.height * 0.04),
 
             Container(
               padding: EdgeInsets.all(MediaQuery.of(context).size.width * 0.05),
@@ -244,7 +244,7 @@ class GamePage extends ConsumerWidget {
                     child: Text(
                       'カタカナを使わずに説明してください！',
                       style: TextStyle(
-                        fontSize: MediaQuery.of(context).size.width * 0.045,
+                        fontSize: MediaQuery.of(context).size.width * 0.04,
                         color: Colors.orange.shade800,
                         fontWeight: FontWeight.w600,
                       ),
@@ -254,7 +254,7 @@ class GamePage extends ConsumerWidget {
               ),
             ),
 
-            SizedBox(height: MediaQuery.of(context).size.height * 0.05),
+            SizedBox(height: MediaQuery.of(context).size.height * 0.04),
 
             // メモ化されたボタンでパフォーマンス最適化
             SizedBox(
@@ -264,6 +264,8 @@ class GamePage extends ConsumerWidget {
                 onPressed: () => _handleNext(context, ref, gameViewModel),
               ),
             ),
+            // レスポンシブ対応：画面サイズに応じて動的に調整
+            SizedBox(height: _getResponsiveBottomSpacing(context)),
           ],
         ),
       ),
@@ -458,6 +460,23 @@ class GamePage extends ConsumerWidget {
         },
       ),
     );
+  }
+
+  /// 画面サイズに応じたボトムスペーシングを計算
+  double _getResponsiveBottomSpacing(BuildContext context) {
+    final screenHeight = MediaQuery.of(context).size.height;
+    final screenWidth = MediaQuery.of(context).size.width;
+
+    // タブレット判定（幅が800px以上または高さが1000px以上）
+    final isTablet = screenWidth >= 800 || screenHeight >= 1000;
+
+    if (isTablet) {
+      // タブレットの場合：最小限のスペーシング
+      return screenHeight * 0.02; // 2%
+    } else {
+      // スマートフォンの場合：従来のスペーシング
+      return screenHeight * 0.12; // 12%
+    }
   }
 }
 
