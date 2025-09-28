@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:lottie/lottie.dart';
 import '../../../data/services/lottie_cache_service.dart';
 import 'congratulations_state.dart';
 
@@ -98,7 +97,7 @@ class CongratulationsViewModel extends StateNotifier<CongratulationsState> {
     final rocketPositionAnimation =
         Tween<Offset>(
           begin: const Offset(-1.0, 0.8), // 画面外左下（-100%, 120%）
-          end: const Offset(0.0, 0.5), // 画面中央（0%, 50%）
+          end: const Offset(0.5, 0.5), // 画面中央（50%, 50%）
         ).animate(
           CurvedAnimation(
             parent: rocketPositionController,
@@ -198,7 +197,7 @@ class CongratulationsViewModel extends StateNotifier<CongratulationsState> {
     final rocketPositionAnimation =
         Tween<Offset>(
           begin: const Offset(-1.0, 0.8), // 画面外左下（-100%, 120%）
-          end: const Offset(0.0, 0.5), // 画面中央（0%, 50%）
+          end: const Offset(0.5, 0.5), // 画面中央（50%, 50%）
         ).animate(
           CurvedAnimation(
             parent: rocketPositionController,
