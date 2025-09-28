@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:katakanahanashi/config/app_config.dart';
 import 'package:katakanahanashi/data/services/ad_service.dart';
 import 'package:katakanahanashi/navigator/app_router.dart';
 import 'package:katakanahanashi/ui/home/game/game_page.dart';
@@ -71,7 +72,10 @@ class _AdDisplayPageState extends State<AdDisplayPage>
     }
 
     // 事前読み込み済み広告がない場合は通常の読み込み
-    AdService.logAdInfo(); // デバッグ情報出力
+    // 本番環境ではデバッグ情報を出力しない（一時的に無効化）
+    // if (AppConfig.isDebugMode) {
+    //   AdService.logAdInfo(); // デバッグ情報出力
+    // }
     InterstitialAd.load(
       adUnitId: AdService.interstitialAdUnitId,
       request: const AdRequest(),
