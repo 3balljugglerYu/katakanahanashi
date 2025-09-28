@@ -10,6 +10,28 @@ import 'onboarding_view_model.dart';
 class OnboardingPage extends ConsumerWidget {
   const OnboardingPage({super.key});
 
+  /// タブレット判定メソッド
+  bool _isTablet(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+    return screenWidth >= 800 || screenHeight >= 1000;
+  }
+
+  /// レスポンシブ対応の画像Flex比率取得
+  int _getImageFlex(BuildContext context) {
+    return _isTablet(context) ? 4 : 6; // タブレット: 40%, スマートフォン: 60%
+  }
+
+  /// レスポンシブ対応のボディFlex比率取得
+  int _getBodyFlex(BuildContext context) {
+    return _isTablet(context) ? 3 : 4; // タブレット: 30%, スマートフォン: 40%
+  }
+
+  /// レスポンシブ対応のスペーシング取得
+  double _getResponsiveSpacing(BuildContext context, double ratio) {
+    return MediaQuery.of(context).size.height * ratio;
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return IntroductionScreen(
@@ -17,51 +39,72 @@ class OnboardingPage extends ConsumerWidget {
       onDone: () => _completeOnboarding(context, ref),
       onSkip: () => _completeOnboarding(context, ref),
       showSkipButton: true,
-      skip: const Text(
+      skip: Text(
         'スキップ',
         style: TextStyle(
-          fontSize: 16,
+          fontSize: _isTablet(context)
+              ? MediaQuery.of(context).size.width *
+                    0.04 // タブレット用
+              : 16, // スマートフォン用
           fontWeight: FontWeight.w600,
           color: Colors.orange,
         ),
       ),
       next: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: EdgeInsets.symmetric(
+          horizontal: _isTablet(context) ? 24 : 16,
+          vertical: _isTablet(context) ? 12 : 8,
+        ),
         decoration: BoxDecoration(
           color: Colors.orange,
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(_isTablet(context) ? 30 : 20),
         ),
-        child: const Text(
+        child: Text(
           '次へ',
           style: TextStyle(
-            fontSize: 16,
+            fontSize: _isTablet(context)
+                ? MediaQuery.of(context).size.width *
+                      0.04 // タブレット用
+                : 16, // スマートフォン用
             fontWeight: FontWeight.w600,
             color: Colors.white,
           ),
         ),
       ),
       done: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+        padding: EdgeInsets.symmetric(
+          horizontal: _isTablet(context) ? 28 : 20,
+          vertical: _isTablet(context) ? 12 : 8,
+        ),
         decoration: BoxDecoration(
           color: Colors.orange,
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(_isTablet(context) ? 30 : 20),
         ),
-        child: const Text(
+        child: Text(
           '始める',
           style: TextStyle(
-            fontSize: 16,
+            fontSize: _isTablet(context)
+                ? MediaQuery.of(context).size.width *
+                      0.04 // タブレット用
+                : 16, // スマートフォン用
             fontWeight: FontWeight.w600,
             color: Colors.white,
           ),
         ),
       ),
       dotsDecorator: DotsDecorator(
-        size: const Size(10.0, 10.0),
+        size: Size(
+          _isTablet(context) ? 12.0 : 10.0,
+          _isTablet(context) ? 12.0 : 10.0,
+        ),
         color: Colors.orange.shade200,
-        activeSize: const Size(22.0, 10.0),
+        activeSize: Size(
+          _isTablet(context) ? 26.0 : 22.0,
+          _isTablet(context) ? 12.0 : 10.0,
+        ),
         activeColor: Colors.orange,
         activeShape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(25.0),
+          borderRadius: BorderRadius.circular(_isTablet(context) ? 30.0 : 25.0),
         ),
       ),
       globalBackgroundColor: Colors.orange.shade50,
@@ -136,9 +179,9 @@ class OnboardingPage extends ConsumerWidget {
 
     // デバイスサイズに応じた動的調整
     double imageRatio;
-    if (screenWidth > 600) {
-      // タブレット: 30%
-      imageRatio = 0.6;
+    if (_isTablet(context)) {
+      // タブレット: 縦長画面に適したサイズ
+      imageRatio = 0.45;
     } else if (screenWidth > 400) {
       // 大きめのスマホ: 35%
       imageRatio = 0.65;
@@ -153,7 +196,9 @@ class OnboardingPage extends ConsumerWidget {
       label: semanticsLabel,
       child: Column(
         children: [
-          const SizedBox(height: 100),
+          SizedBox(
+            height: _getResponsiveSpacing(context, 0.08),
+          ), // レスポンシブ対応のスペーシング
           Align(
             alignment: Alignment.topCenter,
             child: Container(
@@ -207,21 +252,27 @@ class OnboardingPage extends ConsumerWidget {
 
     return PageDecoration(
       titleTextStyle: TextStyle(
-        fontSize: screenWidth * 0.065,
+        fontSize: _isTablet(context)
+            ? screenWidth *
+                  0.050 // タブレット: 小さめ
+            : screenWidth * 0.065, // スマートフォン: 従来通り
         fontWeight: FontWeight.bold,
         color: Colors.orange.shade800,
         height: 1.3,
       ),
       bodyTextStyle: TextStyle(
-        fontSize: screenWidth * 0.045,
+        fontSize: _isTablet(context)
+            ? screenWidth *
+                  0.030 // タブレット: 小さめ
+            : screenWidth * 0.045, // スマートフォン: 従来通り
         fontWeight: FontWeight.bold,
         color: Colors.orange.shade500,
         height: 1.6,
       ),
-      // 画面全体を使用し、image領域がflexで60%程度になるよう調整
+      // 画面全体を使用し、レスポンシブ対応でFlex比率を調整
       fullScreen: true,
-      imageFlex: 6,
-      bodyFlex: 4,
+      imageFlex: _getImageFlex(context),
+      bodyFlex: _getBodyFlex(context),
       contentMargin: EdgeInsets.symmetric(
         horizontal: screenWidth * 0.08,
         vertical: 12,
