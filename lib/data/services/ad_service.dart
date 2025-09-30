@@ -25,9 +25,9 @@ class AdService {
     }
   }
 
-  // 本番用広告IDをログ出力（archiveビルド確認用）
+  // 広告IDをログ出力（環境別確認用）
   static void logProductionAdId() {
-    print('=== 本番用広告ID確認 ===');
+    print('=== 広告ID確認 ===');
     print('環境: ${AppConfig.environment}');
     print('プラットフォーム: ${Platform.operatingSystem}');
 
@@ -37,8 +37,8 @@ class AdService {
     print('iOS本番用広告ID: ${_getIosProductionAdId()}');
 
     print('--- AppConfig経由で取得 ---');
-    print('Android本番用広告ID: ${AppConfig.androidInterstitialAdUnitId}');
-    print('iOS本番用広告ID: ${AppConfig.iosInterstitialAdUnitId}');
+    print('Android広告ID: ${AppConfig.androidInterstitialAdUnitId}');
+    print('iOS広告ID: ${AppConfig.iosInterstitialAdUnitId}');
     print('現在使用中の広告ID: $interstitialAdUnitId');
     print('========================');
   }

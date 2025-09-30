@@ -10,9 +10,6 @@ class KatakanaNashiApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // アプリ起動時に環境を強制的に本番に設定
-    AppConfig.setEnvironment(Environment.production);
-
     // アプリ起動時に環境と広告ID確認ログを出力
     print('🚨🚨🚨 アプリ起動 - 環境確認 🚨🚨🚨');
     print('現在の環境: ${AppConfig.environment}');
