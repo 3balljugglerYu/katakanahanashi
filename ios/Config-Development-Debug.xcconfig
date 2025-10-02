@@ -1,0 +1,4 @@
+// Development-Debug
+#include "Flutter/Debug.xcconfig"
+PRODUCT_BUNDLE_IDENTIFIER = com.kotoba.kakurenbo.dev
+APP_DISPLAY_NAME = [DEV] Kakurenbo
