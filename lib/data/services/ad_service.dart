@@ -24,4 +24,43 @@ class AdService {
       print('================');
     }
   }
+
+  // 広告IDをログ出力（環境別確認用）
+  static void logProductionAdId() {
+    print('=== 広告ID確認 ===');
+    print('環境: ${AppConfig.environment}');
+    print('プラットフォーム: ${Platform.operatingSystem}');
+
+    // Environment.productionから直接取得して表示
+    print('--- Environment.production から取得 ---');
+    print('Android本番用広告ID: ${_getAndroidProductionAdId()}');
+    print('iOS本番用広告ID: ${_getIosProductionAdId()}');
+
+    print('--- AppConfig経由で取得 ---');
+    print('Android広告ID: ${AppConfig.androidInterstitialAdUnitId}');
+    print('iOS広告ID: ${AppConfig.iosInterstitialAdUnitId}');
+    print('現在使用中の広告ID: $interstitialAdUnitId');
+    print('========================');
+  }
+
+  // Environment.productionから直接取得するメソッド
+  static String _getAndroidProductionAdId() {
+    switch (Environment.production) {
+      case Environment.development:
+      case Environment.staging:
+        return 'ca-app-pub-3940256099942544/1033173712';
+      case Environment.production:
+        return 'ca-app-pub-2716829166250639/3387528627';
+    }
+  }
+
+  static String _getIosProductionAdId() {
+    switch (Environment.production) {
+      case Environment.development:
+      case Environment.staging:
+        return 'ca-app-pub-3940256099942544/4411468910';
+      case Environment.production:
+        return 'ca-app-pub-2716829166250639/9936269880';
+    }
+  }
 }

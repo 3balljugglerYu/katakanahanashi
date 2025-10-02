@@ -3,7 +3,7 @@ import java.io.FileInputStream
 
 plugins {
     id("com.android.application")
-    id("kotlin-android")
+    id("org.jetbrains.kotlin.android")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
 }
@@ -52,25 +52,28 @@ android {
         }
     }
 
-    flavorDimensions += "environment"
+    flavorDimensions += "default"
     
     productFlavors {
         create("production") {
-            dimension = "environment"
-            applicationId = "com.kotoba.kakurenbo"
-            versionNameSuffix = ""
+            dimension = "default"
+            resValue("string", "app_name", "ことばかくれんぼ")
+//            applicationId = "com.kotoba.kakurenbo"
+//            versionNameSuffix = ""
         }
         
         create("staging") {
-            dimension = "environment"
-            applicationId = "com.kotoba.kakurenbo.stg"
-            versionNameSuffix = "-stg"
+            dimension = "default"
+            resValue("string", "app_name", "[STG] ことばかくれんぼ")
+            applicationIdSuffix = ".stg"
+//            versionNameSuffix = "-stg"
         }
         
         create("development") {
-            dimension = "environment"
-            applicationId = "com.kotoba.kakurenbo.dev"
-            versionNameSuffix = "-dev"
+            dimension = "default"
+            resValue("string", "app_name", "[DEV] ことばかくれんぼ")
+            applicationIdSuffix = ".dev"
+//            versionNameSuffix = "-dev"
         }
     }
 
@@ -80,9 +83,7 @@ android {
             isMinifyEnabled = false
             isShrinkResources = false
             // proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
-            
-            // 本番用署名設定を使用する場合は以下をコメントアウト
-            // signingConfig = signingConfigs.getByName("debug")
+
             signingConfig = signingConfigs.getByName("release")
         }
     }

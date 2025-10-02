@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:katakanahanashi/config/app_config.dart';
 import 'package:katakanahanashi/data/services/ad_service.dart';
 import 'package:katakanahanashi/navigator/app_router.dart';
 import 'package:katakanahanashi/ui/home/congratulations/congratulations_page.dart';
@@ -216,7 +217,7 @@ class GamePage extends ConsumerWidget {
               ),
             ),
 
-            SizedBox(height: MediaQuery.of(context).size.height * 0.05),
+            SizedBox(height: MediaQuery.of(context).size.height * 0.04),
 
             Container(
               padding: EdgeInsets.all(MediaQuery.of(context).size.width * 0.05),
@@ -244,7 +245,7 @@ class GamePage extends ConsumerWidget {
                     child: Text(
                       'カタカナを使わずに説明してください！',
                       style: TextStyle(
-                        fontSize: MediaQuery.of(context).size.width * 0.045,
+                        fontSize: MediaQuery.of(context).size.width * 0.04,
                         color: Colors.orange.shade800,
                         fontWeight: FontWeight.w600,
                       ),
@@ -254,7 +255,7 @@ class GamePage extends ConsumerWidget {
               ),
             ),
 
-            SizedBox(height: MediaQuery.of(context).size.height * 0.05),
+            SizedBox(height: MediaQuery.of(context).size.height * 0.04),
 
             // メモ化されたボタンでパフォーマンス最適化
             SizedBox(
@@ -264,6 +265,8 @@ class GamePage extends ConsumerWidget {
                 onPressed: () => _handleNext(context, ref, gameViewModel),
               ),
             ),
+            // レスポンシブ対応：画面サイズに応じて動的に調整
+            SizedBox(height: _getResponsiveBottomSpacing(context)),
           ],
         ),
       ),
@@ -291,7 +294,10 @@ class GamePage extends ConsumerWidget {
 
   static void _preloadInterstitialAd() {
     print("広告の事前読み込みを開始します");
-    AdService.logAdInfo(); // デバッグ情報出力
+    // 本番環境ではデバッグ情報を出力しない（一時的に無効化）
+    // if (AppConfig.isDebugMode) {
+    //   AdService.logAdInfo(); // デバッグ情報出力
+    // }
     InterstitialAd.load(
       adUnitId: AdService.interstitialAdUnitId,
       request: const AdRequest(),
@@ -458,6 +464,23 @@ class GamePage extends ConsumerWidget {
         },
       ),
     );
+  }
+
+  /// 画面サイズに応じたボトムスペーシングを計算
+  double _getResponsiveBottomSpacing(BuildContext context) {
+    final screenHeight = MediaQuery.of(context).size.height;
+    final screenWidth = MediaQuery.of(context).size.width;
+
+    // タブレット判定（幅が800px以上または高さが1000px以上）
+    final isTablet = screenWidth >= 800 || screenHeight >= 1000;
+
+    if (isTablet) {
+      // タブレットの場合：最小限のスペーシング
+      return screenHeight * 0.02; // 2%
+    } else {
+      // スマートフォンの場合：従来のスペーシング
+      return screenHeight * 0.12; // 12%
+    }
   }
 }
 

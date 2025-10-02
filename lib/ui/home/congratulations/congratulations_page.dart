@@ -145,10 +145,48 @@ class _CongratulationsContent extends StatelessWidget {
 
   const _CongratulationsContent({required this.state, required this.resources});
 
+  /// タブレット判定メソッド
+  bool _isTablet(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+    return screenWidth >= 800 || screenHeight >= 1000;
+  }
+
+  /// レスポンシブ対応アニメーションサイズ取得
+  double _getResponsiveAnimationSize(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    if (_isTablet(context)) {
+      return screenWidth * 0.6; // タブレット: 画面幅の60%
+    } else {
+      return screenWidth * 0.9; // スマートフォン: 画面幅の90%
+    }
+  }
+
+  /// レスポンシブ対応フォントサイズ取得
+  double _getResponsiveFontSize(BuildContext context, double baseRatio) {
+    return MediaQuery.of(context).size.width * baseRatio;
+  }
+
+  /// レスポンシブ対応パディング取得
+  EdgeInsets _getResponsivePadding(
+    BuildContext context, {
+    double horizontalRatio = 0.04,
+    double verticalRatio = 0.015,
+  }) {
+    return EdgeInsets.symmetric(
+      horizontal: MediaQuery.of(context).size.width * horizontalRatio,
+      vertical: MediaQuery.of(context).size.height * verticalRatio,
+    );
+  }
+
+  /// レスポンシブ対応スペーシング取得
+  double _getResponsiveSpacing(BuildContext context, double ratio) {
+    return MediaQuery.of(context).size.height * ratio;
+  }
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    final baseWidth = size.width;
 
     return PopScope(
       canPop: false,
@@ -159,7 +197,14 @@ class _CongratulationsContent extends StatelessWidget {
           children: [
             // 背景：紙吹雪（段階的表示）
             if (state.canShowConfetti)
-              Positioned.fill(child: resources.confettiLottie),
+              Positioned.fill(
+                child: Center(
+                  child: Transform.translate(
+                    offset: Offset.zero, // 中央配置のためのTransform
+                    child: resources.confettiLottie,
+                  ),
+                ),
+              ),
 
             // 中央の Congratulations をシンプルに拡大（段階的表示）
             if (state.canShowCongrats)
@@ -169,7 +214,7 @@ class _CongratulationsContent extends StatelessWidget {
                   return Positioned(
                     top:
                         size.height * resources.positionAnimation.value -
-                        100, // 高さの半分を補正
+                        _getResponsiveSpacing(context, 0.12), // レスポンシブ対応の高さ補正
                     left: 0,
                     right: 0,
                     child: Center(
@@ -177,7 +222,7 @@ class _CongratulationsContent extends StatelessWidget {
                         scale: resources.scaleAnimation,
                         alignment: Alignment.center,
                         child: SizedBox(
-                          width: baseWidth,
+                          width: _getResponsiveAnimationSize(context),
                           child: resources.congratsLottie,
                         ),
                       ),
@@ -191,25 +236,31 @@ class _CongratulationsContent extends StatelessWidget {
               AnimatedBuilder(
                 animation: resources.rocketPositionAnimation,
                 builder: (context, child) {
+                  final animationSize = _getResponsiveAnimationSize(context);
                   return Positioned(
                     top:
                         size.height *
                             resources.rocketPositionAnimation.value.dy -
-                        200, // 400pxの半分を引く
+                        animationSize / 2, // レスポンシブ対応の高さ補正
                     left:
-                        size.width * resources.rocketPositionAnimation.value.dx,
+                        size.width *
+                            resources.rocketPositionAnimation.value.dx -
+                        animationSize / 2, // ロケット猫の中心を画面中央に配置するための補正
                     child: SizedBox(
-                      width: 400,
-                      height: 400,
+                      width: animationSize,
+                      height: animationSize,
                       child: resources.rocketLottie,
                     ),
                   );
                 },
               ),
             Positioned(
-              bottom: 100,
-              left: 24,
-              right: 24,
+              bottom: _getResponsiveSpacing(
+                context,
+                0.12,
+              ), // レスポンシブ対応のボトムスペーシング
+              left: MediaQuery.of(context).size.width * 0.05, // レスポンシブ対応の左マージン
+              right: MediaQuery.of(context).size.width * 0.05, // レスポンシブ対応の右マージン
               child: ElevatedButton(
                 onPressed: () {
                   Navigator.of(context).pushReplacement(
@@ -221,16 +272,25 @@ class _CongratulationsContent extends StatelessWidget {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.orange,
                   foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 18),
+                  padding: _getResponsivePadding(
+                    context,
+                    horizontalRatio: 0.08,
+                    verticalRatio: 0.022,
+                  ),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(36),
+                    borderRadius: BorderRadius.circular(
+                      _isTablet(context) ? 48 : 36, // タブレット用の大きな角丸
+                    ),
                   ),
                   elevation: 10,
                   shadowColor: Colors.orange.withOpacity(0.5),
                 ),
-                child: const Text(
+                child: Text(
                   'OK',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    fontSize: _getResponsiveFontSize(context, 0.045),
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ),
