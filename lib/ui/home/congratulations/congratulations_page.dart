@@ -214,7 +214,7 @@ class _CongratulationsContent extends StatelessWidget {
                   return Positioned(
                     top:
                         size.height * resources.positionAnimation.value -
-                        _getResponsiveSpacing(context, 0.12), // レスポンシブ対応の高さ補正
+                        _getResponsiveSpacing(context, 0.0), // レスポンシブ対応の高さ補正
                     left: 0,
                     right: 0,
                     child: Center(
@@ -223,7 +223,18 @@ class _CongratulationsContent extends StatelessWidget {
                         alignment: Alignment.center,
                         child: SizedBox(
                           width: _getResponsiveAnimationSize(context),
-                          child: resources.congratsLottie,
+                          child: DefaultTextStyle(
+                            style: TextStyle(
+                              fontSize: _getResponsiveFontSize(
+                                context,
+                                0.12,
+                              ), // 画面幅の12%
+                              fontWeight: FontWeight.bold,
+                              color: Colors.red,
+                            ),
+                            textAlign: TextAlign.center,
+                            child: resources.congratsLottie,
+                          ),
                         ),
                       ),
                     ),

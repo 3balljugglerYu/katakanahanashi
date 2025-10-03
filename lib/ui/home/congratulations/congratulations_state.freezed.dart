@@ -26,7 +26,9 @@ mixin _$CongratulationsState {
   bool get isControllersReady => throw _privateConstructorUsedError;
   bool get isCongratsReady => throw _privateConstructorUsedError;
   bool get isConfettiReady => throw _privateConstructorUsedError;
-  bool get isRocketReady => throw _privateConstructorUsedError;
+  bool get isRocketReady =>
+      throw _privateConstructorUsedError; // ロケット猫Lottieアニメーション制御
+  bool get isRocketLottieStarted => throw _privateConstructorUsedError;
 
   /// Create a copy of CongratulationsState
   /// with the given fields replaced by the non-null parameter values.
@@ -52,6 +54,7 @@ abstract class $CongratulationsStateCopyWith<$Res> {
     bool isCongratsReady,
     bool isConfettiReady,
     bool isRocketReady,
+    bool isRocketLottieStarted,
   });
 }
 
@@ -82,6 +85,7 @@ class _$CongratulationsStateCopyWithImpl<
     Object? isCongratsReady = null,
     Object? isConfettiReady = null,
     Object? isRocketReady = null,
+    Object? isRocketLottieStarted = null,
   }) {
     return _then(
       _value.copyWith(
@@ -121,6 +125,10 @@ class _$CongratulationsStateCopyWithImpl<
                 ? _value.isRocketReady
                 : isRocketReady // ignore: cast_nullable_to_non_nullable
                       as bool,
+            isRocketLottieStarted: null == isRocketLottieStarted
+                ? _value.isRocketLottieStarted
+                : isRocketLottieStarted // ignore: cast_nullable_to_non_nullable
+                      as bool,
           )
           as $Val,
     );
@@ -146,6 +154,7 @@ abstract class _$$CongratulationsStateImplCopyWith<$Res>
     bool isCongratsReady,
     bool isConfettiReady,
     bool isRocketReady,
+    bool isRocketLottieStarted,
   });
 }
 
@@ -172,6 +181,7 @@ class __$$CongratulationsStateImplCopyWithImpl<$Res>
     Object? isCongratsReady = null,
     Object? isConfettiReady = null,
     Object? isRocketReady = null,
+    Object? isRocketLottieStarted = null,
   }) {
     return _then(
       _$CongratulationsStateImpl(
@@ -211,6 +221,10 @@ class __$$CongratulationsStateImplCopyWithImpl<$Res>
             ? _value.isRocketReady
             : isRocketReady // ignore: cast_nullable_to_non_nullable
                   as bool,
+        isRocketLottieStarted: null == isRocketLottieStarted
+            ? _value.isRocketLottieStarted
+            : isRocketLottieStarted // ignore: cast_nullable_to_non_nullable
+                  as bool,
       ),
     );
   }
@@ -229,6 +243,7 @@ class _$CongratulationsStateImpl extends _CongratulationsState {
     this.isCongratsReady = false,
     this.isConfettiReady = false,
     this.isRocketReady = false,
+    this.isRocketLottieStarted = false,
   }) : super._();
 
   @override
@@ -259,10 +274,14 @@ class _$CongratulationsStateImpl extends _CongratulationsState {
   @override
   @JsonKey()
   final bool isRocketReady;
+  // ロケット猫Lottieアニメーション制御
+  @override
+  @JsonKey()
+  final bool isRocketLottieStarted;
 
   @override
   String toString() {
-    return 'CongratulationsState(isAnimationStarted: $isAnimationStarted, isScaleAnimating: $isScaleAnimating, isConfettiAnimating: $isConfettiAnimating, isRocketVisible: $isRocketVisible, animationProgress: $animationProgress, isControllersReady: $isControllersReady, isCongratsReady: $isCongratsReady, isConfettiReady: $isConfettiReady, isRocketReady: $isRocketReady)';
+    return 'CongratulationsState(isAnimationStarted: $isAnimationStarted, isScaleAnimating: $isScaleAnimating, isConfettiAnimating: $isConfettiAnimating, isRocketVisible: $isRocketVisible, animationProgress: $animationProgress, isControllersReady: $isControllersReady, isCongratsReady: $isCongratsReady, isConfettiReady: $isConfettiReady, isRocketReady: $isRocketReady, isRocketLottieStarted: $isRocketLottieStarted)';
   }
 
   @override
@@ -287,7 +306,9 @@ class _$CongratulationsStateImpl extends _CongratulationsState {
             (identical(other.isConfettiReady, isConfettiReady) ||
                 other.isConfettiReady == isConfettiReady) &&
             (identical(other.isRocketReady, isRocketReady) ||
-                other.isRocketReady == isRocketReady));
+                other.isRocketReady == isRocketReady) &&
+            (identical(other.isRocketLottieStarted, isRocketLottieStarted) ||
+                other.isRocketLottieStarted == isRocketLottieStarted));
   }
 
   @override
@@ -302,6 +323,7 @@ class _$CongratulationsStateImpl extends _CongratulationsState {
     isCongratsReady,
     isConfettiReady,
     isRocketReady,
+    isRocketLottieStarted,
   );
 
   /// Create a copy of CongratulationsState
@@ -328,6 +350,7 @@ abstract class _CongratulationsState extends CongratulationsState {
     final bool isCongratsReady,
     final bool isConfettiReady,
     final bool isRocketReady,
+    final bool isRocketLottieStarted,
   }) = _$CongratulationsStateImpl;
   const _CongratulationsState._() : super._();
 
@@ -348,7 +371,9 @@ abstract class _CongratulationsState extends CongratulationsState {
   @override
   bool get isConfettiReady;
   @override
-  bool get isRocketReady;
+  bool get isRocketReady; // ロケット猫Lottieアニメーション制御
+  @override
+  bool get isRocketLottieStarted;
 
   /// Create a copy of CongratulationsState
   /// with the given fields replaced by the non-null parameter values.

@@ -39,6 +39,7 @@ class LottieCacheService {
     AnimationController? controller,
     bool repeat = false,
     BoxFit fit = BoxFit.contain,
+    FrameRate? frameRate,
   }) {
     final cachedComposition = _cache[assetPath];
 
@@ -50,6 +51,7 @@ class LottieCacheService {
         controller: controller,
         repeat: repeat,
         fit: fit,
+        frameRate: frameRate,
       );
     } else {
       // キャッシュミス: 通常読み込み（フォールバック）
@@ -58,6 +60,7 @@ class LottieCacheService {
         controller: controller,
         repeat: repeat,
         fit: fit,
+        frameRate: frameRate,
         onLoaded: (composition) {
           // 読み込み完了時にキャッシュに保存
           _cache[assetPath] = composition;
