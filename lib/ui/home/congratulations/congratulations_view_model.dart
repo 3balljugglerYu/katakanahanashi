@@ -120,14 +120,6 @@ class CongratulationsViewModel extends StateNotifier<CongratulationsState> {
       vsync: vsync,
     );
 
-    // Congratulations文字列（Lottieアニメーションを削除）
-    // フォントサイズはUI側でレスポンシブ対応
-    final congratsText = const Text(
-      'Congratulations!',
-      style: TextStyle(fontWeight: FontWeight.bold, color: Colors.red),
-      textAlign: TextAlign.center,
-    );
-
     // 背景紙吹雪 Lottieアニメーション（キャッシュサービス使用）
     final confettiLottie = LottieCacheService().getCachedLottie(
       'assets/animations/confetti on transparent background.json',
@@ -146,7 +138,7 @@ class CongratulationsViewModel extends StateNotifier<CongratulationsState> {
       frameRate: FrameRate(20),
     );
 
-    // リソースを作成
+    // リソースを作成（Congratulations文字列は軽量版から参照）
     _resources = CongratulationsResources(
       scaleController: scaleController,
       scaleAnimation: scaleAnimation,
@@ -155,7 +147,11 @@ class CongratulationsViewModel extends StateNotifier<CongratulationsState> {
       rocketPositionController: rocketPositionController,
       rocketPositionAnimation: rocketPositionAnimation,
       lottieController: lottieController,
-      congratsLottie: congratsText,
+      congratsLottie: const Text(
+        'Congratulations!',
+        style: TextStyle(fontWeight: FontWeight.bold, color: Colors.red),
+        textAlign: TextAlign.center,
+      ),
       confettiController: confettiController,
       confettiLottie: confettiLottie,
       rocketController: rocketController,
