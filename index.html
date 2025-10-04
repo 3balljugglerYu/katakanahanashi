@@ -1,44 +1,511 @@
 <!doctype html>
 <html lang="ja">
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ことばかくれんぼ | 公式サイト</title>
-<style>
-  body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;margin:0;padding:24px;line-height:1.6}
-  .wrap{max-width:720px;margin:0 auto}
-  header h1{margin:0 0 8px}
-  .cta a{display:inline-block;margin-right:12px;text-decoration:none;border:1px solid #ccc;padding:10px 14px;border-radius:8px}
-  footer{margin-top:32px;font-size:.9em;color:#666}
-</style>
-<body><div class="wrap">
-  <header>
-    <h1>ことばかくれんぼ</h1>
-    <p>カタカナを使わずに言葉を説明する、ことば遊びパーティーゲーム。</p>
-  </header>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="カタカナを使わずに言葉を説明する、ことば遊びパーティーゲーム「ことばかくれんぼ」の公式サイト">
+  <meta name="keywords" content="ことばかくれんぼ,パーティーゲーム,ことば遊び,カタカナ禁止">
+  <title>ことばかくれんぼ | 公式サイト</title>
+  
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://katakanahanashi.com/">
+  <meta property="og:title" content="ことばかくれんぼ | 公式サイト">
+  <meta property="og:description" content="カタカナを使わずに言葉を説明する、ことば遊びパーティーゲーム">
+  
+  <!-- Twitter -->
+  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:url" content="https://katakanahanashi.com/">
+  <meta property="twitter:title" content="ことばかくれんぼ | 公式サイト">
+  <meta property="twitter:description" content="カタカナを使わずに言葉を説明する、ことば遊びパーティーゲーム">
+  
+  <style>
+    /* パフォーマンス最適化: クリティカルCSS */
+    :root {
+      --primary-color: #f97316;
+      --primary-dark: #ea580c;
+      --secondary-color: #fb923c;
+      --accent-color: #fbbf24;
+      --text-primary: #1f2937;
+      --text-secondary: #6b7280;
+      --text-muted: #9ca3af;
+      --bg-primary: #ffffff;
+      --bg-secondary: #f9fafb;
+      --bg-accent: #f3f4f6;
+      --border-color: #e5e7eb;
+      --border-focus: #6366f1;
+      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+      --radius-sm: 0.375rem;
+      --radius-md: 0.5rem;
+      --radius-lg: 0.75rem;
+      --radius-xl: 1rem;
+      --spacing-xs: 0.5rem;
+      --spacing-sm: 0.75rem;
+      --spacing-md: 1rem;
+      --spacing-lg: 1.5rem;
+      --spacing-xl: 2rem;
+      --spacing-2xl: 3rem;
+      --font-size-sm: 0.875rem;
+      --font-size-base: 1rem;
+      --font-size-lg: 1.125rem;
+      --font-size-xl: 1.25rem;
+      --font-size-2xl: 1.5rem;
+      --font-size-3xl: 1.875rem;
+      --font-size-4xl: 2.25rem;
+      --line-height-tight: 1.25;
+      --line-height-normal: 1.5;
+      --line-height-relaxed: 1.75;
+    }
 
-  <section>
-    <h2>遊び方</h2>
-    <ol>
-      <li>お題を引く → カタカナ禁止で説明！</li>
-      <li>時間内に当てられたらスコア加点</li>
-      <li>みんなでワイワイ対戦</li>
-    </ol>
-  </section>
+    * {
+      box-sizing: border-box;
+    }
 
-  <section class="cta">
-    <!-- ストア公開後にURLを入れる -->
-    <a href="#" aria-disabled="true">App Store（準備中）</a>
-    <a href="#" aria-disabled="true">Google Play（準備中）</a>
-  </section>
+    html {
+      scroll-behavior: smooth;
+    }
 
-  <section>
-    <h2>サポート</h2>
-    <p>お問い合わせ：<a href="mailto:support@example.com">support@example.com</a></p>
-    <p><a href="/katakanahanashi/privacy.html">プライバシーポリシー</a></p>
-  </section>
+    body {
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif;
+      margin: 0;
+      padding: 0;
+      line-height: var(--line-height-normal);
+      color: var(--text-primary);
+      background-color: var(--bg-primary);
+      font-size: var(--font-size-base);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
 
-  <footer>
-    <p>© 2025 Tomody / ことばかくれんぼ</p>
-  </footer>
-</div></body>
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 var(--spacing-md);
+    }
+
+    .main-content {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .header {
+      background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+      color: white;
+      padding: var(--spacing-2xl) 0;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/><circle cx="50" cy="10" r="0.5" fill="white" opacity="0.1"/><circle cx="10" cy="60" r="0.5" fill="white" opacity="0.1"/><circle cx="90" cy="40" r="0.5" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+      opacity: 0.3;
+    }
+
+    .header-content {
+      position: relative;
+      z-index: 1;
+    }
+
+    .header h1 {
+      margin: 0 0 var(--spacing-md);
+      font-size: var(--font-size-4xl);
+      font-weight: 800;
+      line-height: var(--line-height-tight);
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .header p {
+      margin: 0;
+      font-size: var(--font-size-lg);
+      opacity: 0.9;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .content {
+      flex: 1;
+      padding: var(--spacing-2xl) 0;
+    }
+
+    .section {
+      margin-bottom: var(--spacing-2xl);
+    }
+
+    .section h2 {
+      font-size: var(--font-size-2xl);
+      font-weight: 700;
+      margin: 0 0 var(--spacing-lg);
+      color: var(--text-primary);
+      position: relative;
+      padding-bottom: var(--spacing-sm);
+    }
+
+    .section h2::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 60px;
+      height: 3px;
+      background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+      border-radius: var(--radius-sm);
+    }
+
+    .game-rules {
+      background: var(--bg-secondary);
+      border-radius: var(--radius-lg);
+      padding: var(--spacing-xl);
+      border: 1px solid var(--border-color);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .game-rules ol {
+      margin: 0;
+      padding-left: var(--spacing-lg);
+      list-style: none;
+      counter-reset: rule-counter;
+    }
+
+    .game-rules li {
+      counter-increment: rule-counter;
+      margin-bottom: var(--spacing-md);
+      padding-left: var(--spacing-lg);
+      position: relative;
+      font-size: var(--font-size-lg);
+      line-height: var(--line-height-relaxed);
+    }
+
+    .game-rules li::before {
+      content: counter(rule-counter);
+      position: absolute;
+      left: 0;
+      top: 0;
+      background: var(--primary-color);
+      color: white;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: var(--font-size-sm);
+      font-weight: 600;
+    }
+
+    .game-rules li:last-child {
+      margin-bottom: 0;
+    }
+
+    .cta {
+      background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-accent) 100%);
+      border-radius: var(--radius-lg);
+      padding: var(--spacing-xl);
+      text-align: center;
+      border: 1px solid var(--border-color);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .cta h2 {
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .store-links {
+      display: flex;
+      gap: var(--spacing-md);
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .store-link {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+      padding: var(--spacing-md) var(--spacing-lg);
+      background: var(--bg-primary);
+      border: 2px solid var(--border-color);
+      border-radius: var(--radius-md);
+      text-decoration: none;
+      color: var(--text-primary);
+      font-weight: 600;
+      font-size: var(--font-size-base);
+      transition: all 0.2s ease;
+      box-shadow: var(--shadow-sm);
+      min-width: 180px;
+      justify-content: center;
+    }
+
+    .store-link:hover:not([aria-disabled="true"]) {
+      border-color: var(--primary-color);
+      background: var(--primary-color);
+      color: white;
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .store-link:focus {
+      outline: 2px solid var(--border-focus);
+      outline-offset: 2px;
+    }
+
+    .store-link[aria-disabled="true"] {
+      opacity: 0.6;
+      cursor: not-allowed;
+      background: var(--bg-accent);
+      color: var(--text-muted);
+    }
+
+    .store-link[aria-disabled="true"]:hover {
+      transform: none;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .support {
+      background: var(--bg-primary);
+      border-radius: var(--radius-lg);
+      padding: var(--spacing-xl);
+      border: 1px solid var(--border-color);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .support p {
+      margin: 0 0 var(--spacing-md);
+      font-size: var(--font-size-base);
+      line-height: var(--line-height-relaxed);
+    }
+
+    .support a {
+      color: var(--primary-color);
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.2s ease;
+    }
+
+    .support a:hover {
+      color: var(--primary-dark);
+      text-decoration: underline;
+    }
+
+    .support a:focus {
+      outline: 2px solid var(--border-focus);
+      outline-offset: 2px;
+      border-radius: var(--radius-sm);
+    }
+
+    .footer {
+      background: var(--bg-secondary);
+      border-top: 1px solid var(--border-color);
+      padding: var(--spacing-xl) 0;
+      text-align: center;
+      color: var(--text-secondary);
+      font-size: var(--font-size-sm);
+    }
+
+    .footer p {
+      margin: 0;
+    }
+
+    /* レスポンシブデザイン */
+    @media (max-width: 768px) {
+      .container {
+        padding: 0 var(--spacing-sm);
+      }
+
+      .header {
+        padding: var(--spacing-xl) 0;
+      }
+
+      .header h1 {
+        font-size: var(--font-size-3xl);
+      }
+
+      .header p {
+        font-size: var(--font-size-base);
+      }
+
+      .content {
+        padding: var(--spacing-xl) 0;
+      }
+
+      .section {
+        margin-bottom: var(--spacing-xl);
+      }
+
+      .game-rules,
+      .cta,
+      .support {
+        padding: var(--spacing-lg);
+      }
+
+      .store-links {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .store-link {
+        width: 100%;
+        max-width: 280px;
+      }
+
+      .section h2 {
+        font-size: var(--font-size-xl);
+      }
+    }
+
+    @media (max-width: 480px) {
+      .header h1 {
+        font-size: var(--font-size-2xl);
+      }
+
+      .game-rules li {
+        font-size: var(--font-size-base);
+      }
+    }
+
+    /* ダークモード対応 */
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --primary-color: #fb923c;
+        --primary-dark: #f97316;
+        --secondary-color: #fbbf24;
+        --accent-color: #fde047;
+        --text-primary: #f9fafb;
+        --text-secondary: #d1d5db;
+        --text-muted: #9ca3af;
+        --bg-primary: #111827;
+        --bg-secondary: #1f2937;
+        --bg-accent: #374151;
+        --border-color: #374151;
+      }
+    }
+
+    /* モーション軽減対応 */
+    @media (prefers-reduced-motion: reduce) {
+      * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+
+    /* アニメーション */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .section {
+      animation: fadeInUp 0.6s ease-out;
+    }
+
+    .section:nth-child(2) {
+      animation-delay: 0.1s;
+    }
+
+    .section:nth-child(3) {
+      animation-delay: 0.2s;
+    }
+
+    .section:nth-child(4) {
+      animation-delay: 0.3s;
+    }
+
+    /* フォーカス可視性の向上 */
+    *:focus {
+      outline: 2px solid var(--border-focus);
+      outline-offset: 2px;
+    }
+
+    /* スキップリンク */
+    .skip-link {
+      position: absolute;
+      top: -40px;
+      left: 6px;
+      background: var(--primary-color);
+      color: white;
+      padding: 8px;
+      text-decoration: none;
+      border-radius: var(--radius-sm);
+      z-index: 1000;
+      transition: top 0.2s ease;
+    }
+
+    .skip-link:focus {
+      top: 6px;
+    }
+  </style>
+<body>
+  <!-- スキップリンク -->
+  <a href="#main-content" class="skip-link">メインコンテンツにスキップ</a>
+  
+  <div class="main-content">
+    <header class="header" role="banner">
+      <div class="container">
+        <div class="header-content">
+          <h1>ことばかくれんぼ</h1>
+          <p>カタカナを使わずに言葉を説明する、ことば遊びパーティーゲーム。</p>
+        </div>
+      </div>
+    </header>
+
+    <main id="main-content" class="content" role="main">
+      <div class="container">
+        <section class="section game-rules" aria-labelledby="game-rules-heading">
+          <h2 id="game-rules-heading">遊び方</h2>
+          <ol>
+            <li>お題を引く → カタカナ禁止で説明！</li>
+            <li>時間内に当てられたらスコア加点</li>
+            <li>みんなでワイワイ対戦</li>
+          </ol>
+        </section>
+
+        <section class="section cta" aria-labelledby="download-heading">
+          <h2 id="download-heading">ダウンロード</h2>
+          <div class="store-links" role="group" aria-label="アプリストアリンク">
+            <a href="https://apps.apple.com/jp/app/%E3%81%93%E3%81%A8%E3%81%B0%E3%81%8B%E3%81%8F%E3%82%8C%E3%82%93%E3%81%BC/id6752815856" class="store-link" role="button" target="_blank" rel="noopener noreferrer">
+              <span aria-hidden="true">📱</span>
+              App Store
+            </a>
+            <a href="https://play.google.com/store/apps/details?id=com.kotoba.kakurenbo" class="store-link" role="button" target="_blank" rel="noopener noreferrer">
+              <span aria-hidden="true">🤖</span>
+              Google Play
+            </a>
+          </div>
+        </section>
+
+        <section class="section support" aria-labelledby="support-heading">
+          <h2 id="support-heading">サポート</h2>
+          <p>
+            お問い合わせ：<a href="mailto:yuh.products@gmail.com" aria-label="サポートメールアドレス">yuh.products@gmail.com</a>
+          </p>
+          <p>
+            <a href="https://snow-office-293.notion.site/2752ae7bded2801887f8e244676bccb1?source=copy_link" aria-label="プライバシーポリシーを開く" target="_blank" rel="noopener noreferrer">プライバシーポリシー</a>
+          </p>
+        </section>
+      </div>
+    </main>
+
+    <footer class="footer" role="contentinfo">
+      <div class="container">
+        <p>© 2025 Tomody / ことばかくれんぼ</p>
+      </div>
+    </footer>
+  </div>
+</body>
 </html>
