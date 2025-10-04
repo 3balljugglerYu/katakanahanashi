@@ -23,11 +23,6 @@ final congratulationsResourcesProvider = Provider<CongratulationsResources?>((
   return viewModel.resources;
 });
 
-/// 初期化専用のProvider
-final congratulationsInitializerProvider = Provider<void>((ref) {
-  // このProviderは初期化のトリガーとして使用
-});
-
 /// Congratulations画面のビジネスロジックを管理
 class CongratulationsViewModel extends StateNotifier<CongratulationsState> {
   CongratulationsResources? _resources;
@@ -222,19 +217,6 @@ class CongratulationsViewModel extends StateNotifier<CongratulationsState> {
     });
   }
 
-  /// アニメーション開始（初期化後）
-  void startInitialization() {
-    if (_resources == null) return;
-
-    // 既に初期化済みの場合はリセット
-    if (state.isAnimationStarted) {
-      resetAnimations();
-    } else {
-      // 初回の場合は遅延開始（後方互換性のため残す）
-      _startAnimationsWithDelay();
-    }
-  }
-
   /// アニメーション即座開始（遷移完了検知用）
   void startInitializationImmediately() {
     if (_resources == null) return;
@@ -321,13 +303,16 @@ class CongratulationsViewModel extends StateNotifier<CongratulationsState> {
       final position = _resources!.rocketPositionAnimation.value;
       // 画面内に入ったかチェック（x座標が0以上、y座標が0以上1以下）
       if (position.dx >= 0.0 && position.dy >= 0.0 && position.dy <= 1.0) {
-        // 状態を更新してLottieアニメーション開始を通知
-        if (state.canStartRocketLottie) {
-          state = state.copyWith(isRocketLottieStarted: true);
-          _startRocketLottieAnimation();
-        }
         // リスナーを削除（一度だけ実行）
         _resources!.rocketPositionAnimation.removeListener(listener);
+
+        // 画面内に入ったタイミングから2秒後にLottieアニメーション開始
+        Future.delayed(const Duration(milliseconds: 500), () {
+          if (_resources != null && state.canStartRocketLottie) {
+            state = state.copyWith(isRocketLottieStarted: true);
+            _startRocketLottieAnimation();
+          }
+        });
       }
     }
 
@@ -369,20 +354,6 @@ class CongratulationsViewModel extends StateNotifier<CongratulationsState> {
 
     // 遅延してアニメーション開始
     _startAnimationsWithDelay();
-  }
-
-  /// アニメーション進行状況を更新
-  void updateAnimationProgress(double progress) {
-    state = state.copyWith(animationProgress: progress);
-  }
-
-  /// アニメーション完了時の処理
-  void onAnimationComplete() {
-    state = state.copyWith(
-      isScaleAnimating: false,
-      isConfettiAnimating: false,
-      animationProgress: 1.0,
-    );
   }
 
   /// 画面破棄時の完全リセット（状態変更は遅延実行で安全に）
