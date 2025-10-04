@@ -17,6 +17,8 @@ class CongratulationsState with _$CongratulationsState {
     @Default(false) bool isCongratsReady,
     @Default(false) bool isConfettiReady,
     @Default(false) bool isRocketReady,
+    // ロケット猫Lottieアニメーション制御
+    @Default(false) bool isRocketLottieStarted,
   }) = _CongratulationsState;
 
   const CongratulationsState._();
@@ -45,6 +47,13 @@ class CongratulationsState with _$CongratulationsState {
   /// ロケット猫アニメーションが表示可能かどうか
   bool get canShowRocket =>
       isControllersReady && isRocketReady && isRocketVisible;
+
+  /// ロケット猫のLottieアニメーションが開始可能かどうか
+  bool get canStartRocketLottie =>
+      isControllersReady &&
+      isRocketReady &&
+      isRocketVisible &&
+      !isRocketLottieStarted;
 }
 
 /// Congratulations画面のリソース管理クラス
