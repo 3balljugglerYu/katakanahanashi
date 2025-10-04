@@ -55,117 +55,11 @@ class CongratulationsViewModel extends StateNotifier<CongratulationsState> {
     state = state.copyWith(isControllersReady: true);
   }
 
-  /// 従来の初期化（後方互換性のため保持）
-  CongratulationsResources initialize(TickerProvider vsync) {
-    // 初期化時に状態を完全にリセット（2回目以降の表示対応）
-    _forceResetState();
-
-    // 既に初期化済みの場合は既存のリソースを返す
-    if (_resources != null) {
-      return _resources!;
-    }
-
-    // スケールアニメーションコントローラー
-    final scaleController = AnimationController(
-      duration: const Duration(milliseconds: 5000),
-      vsync: vsync,
-    );
-
-    // スケールアニメーション
-    final scaleAnimation = CurvedAnimation(
-      parent: scaleController,
-      curve: Curves.elasticOut,
-    ).drive(Tween(begin: 0.3, end: 1.0));
-
-    // 位置移動アニメーション（2秒後に上に移動）
-    final positionController = AnimationController(
-      duration: const Duration(milliseconds: 1000),
-      vsync: vsync,
-    );
-    final positionAnimation =
-        Tween<double>(
-          begin: 0.40, // 画面の40%の位置
-          end: 0.2, // 画面の20%の位置
-        ).animate(
-          CurvedAnimation(parent: positionController, curve: Curves.easeInOut),
-        );
-
-    // ロケット猫の飛び込みアニメーション（2秒後に左下から右上へ）
-    final rocketPositionController = AnimationController(
-      duration: const Duration(milliseconds: 1500),
-      vsync: vsync,
-    );
-    final rocketPositionAnimation =
-        Tween<Offset>(
-          begin: const Offset(-1.0, 0.8), // 画面外左下（-100%, 120%）
-          end: const Offset(0.5, 0.5), // 画面中央（50%, 50%）
-        ).animate(
-          CurvedAnimation(
-            parent: rocketPositionController,
-            curve: Curves.easeOutCubic,
-          ),
-        );
-
-    // Lottieコントローラー（初期durationを設定してrepeat()エラーを防止）
-    final lottieController = AnimationController(
-      duration: const Duration(seconds: 3), // デフォルト値（onLoadedで上書き）
-      vsync: vsync,
-    );
-    final confettiController = AnimationController(
-      duration: const Duration(seconds: 2), // デフォルト値（onLoadedで上書き）
-      vsync: vsync,
-    );
-    final rocketController = AnimationController(
-      duration: const Duration(seconds: 2), // デフォルト値（onLoadedで上書き）
-      vsync: vsync,
-    );
-
-    // 背景紙吹雪 Lottieアニメーション（キャッシュサービス使用）
-    final confettiLottie = LottieCacheService().getCachedLottie(
-      'assets/animations/confetti on transparent background.json',
-      controller: confettiController,
-      repeat: false,
-      fit: BoxFit.cover,
-      frameRate: FrameRate(20),
-    );
-
-    // ロケット猫 Lottieアニメーション（キャッシュサービス使用）
-    final rocketLottie = LottieCacheService().getCachedLottie(
-      'assets/animations/Cat in a rocket.json',
-      controller: rocketController,
-      repeat: false,
-      fit: BoxFit.contain,
-      frameRate: FrameRate(20),
-    );
-
-    // リソースを作成（Congratulations文字列は軽量版から参照）
-    _resources = CongratulationsResources(
-      scaleController: scaleController,
-      scaleAnimation: scaleAnimation,
-      positionController: positionController,
-      positionAnimation: positionAnimation,
-      rocketPositionController: rocketPositionController,
-      rocketPositionAnimation: rocketPositionAnimation,
-      lottieController: lottieController,
-      congratsLottie: const Text(
-        'Congratulations!',
-        style: TextStyle(fontWeight: FontWeight.bold, color: Colors.red),
-        textAlign: TextAlign.center,
-      ),
-      confettiController: confettiController,
-      confettiLottie: confettiLottie,
-      rocketController: rocketController,
-      rocketLottie: rocketLottie,
-    );
-
-    return _resources!;
-  }
-
   /// アニメーションコントローラーのみ作成（軽量）
   void _createControllers(TickerProvider vsync) {
     // スケールアニメーションコントローラー
     final scaleController = AnimationController(
-      duration: const Duration(milliseconds: 5000),
+      duration: const Duration(milliseconds: 3000),
       vsync: vsync,
     );
 
@@ -173,7 +67,7 @@ class CongratulationsViewModel extends StateNotifier<CongratulationsState> {
     final scaleAnimation = CurvedAnimation(
       parent: scaleController,
       curve: Curves.elasticOut,
-    ).drive(Tween(begin: 0.3, end: 1.0));
+    ).drive(Tween(begin: 0.0, end: 1.0));
 
     // 位置移動アニメーション（2秒後に上に移動）
     final positionController = AnimationController(

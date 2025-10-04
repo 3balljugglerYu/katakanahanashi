@@ -223,17 +223,25 @@ class _CongratulationsContent extends StatelessWidget {
                         alignment: Alignment.center,
                         child: SizedBox(
                           width: _getResponsiveAnimationSize(context),
-                          child: DefaultTextStyle(
-                            style: TextStyle(
-                              fontSize: _getResponsiveFontSize(
-                                context,
-                                0.12,
-                              ), // 画面幅の12%
-                              fontWeight: FontWeight.bold,
-                              color: Colors.red,
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown, // はみ出す時だけ縮小
+                            child: DefaultTextStyle(
+                              style: TextStyle(
+                                fontSize: _getResponsiveFontSize(
+                                  context,
+                                  0.15,
+                                ), // 基準サイズを大きく（15%）
+                                fontWeight: FontWeight.bold,
+                                color: Colors.red,
+                              ),
+                              textAlign: TextAlign.center,
+                              child: Text(
+                                'Congratulations!',
+                                maxLines: 1,
+                                softWrap: false, // 改行しない
+                                overflow: TextOverflow.visible,
+                              ),
                             ),
-                            textAlign: TextAlign.center,
-                            child: resources.congratsLottie,
                           ),
                         ),
                       ),
