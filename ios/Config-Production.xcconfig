@@ -1,0 +1,4 @@
+#include "Generated.xcconfig"
+
+PRODUCT_BUNDLE_IDENTIFIER = com.kotoba.kakurenbo
+APP_DISPLAY_NAME = ことばかくれんぼ
