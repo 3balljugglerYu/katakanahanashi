@@ -5,6 +5,7 @@ import 'package:katakanahanashi/data/katakana_words.dart';
 import 'package:katakanahanashi/data/repositories/word_rating_repository.dart';
 import 'package:katakanahanashi/data/models/simple_rating.dart';
 import 'package:katakanahanashi/data/services/word_duplication_service.dart';
+import 'package:katakanahanashi/data/services/rating_batch_service.dart';
 import 'package:katakanahanashi/domain/repository/katakana_word.dart';
 
 import 'game_state.dart';
@@ -25,6 +26,17 @@ class GameViewModel extends StateNotifier<GameState> {
 
   GameViewModel(this._repository) : super(const GameState()) {
     _initializeGame();
+    _retryPendingRatingsOnStart();
+  }
+
+  // ゲーム開始時に未送信の評価をリトライ
+  void _retryPendingRatingsOnStart() async {
+    try {
+      await _repository.retryPendingRatings();
+    } catch (e) {
+      // リトライエラーは静かに処理
+      print('GameViewModel - Error retrying pending ratings on start: $e');
+    }
   }
 
   void _initializeGame() async {
@@ -33,6 +45,7 @@ class GameViewModel extends StateNotifier<GameState> {
       isLoading: true,
       errorMessage: null,
       currentQuestionIndex: 0,
+      pendingRatings: [], // バッチ評価をクリア
     );
 
     try {
@@ -191,35 +204,71 @@ class GameViewModel extends StateNotifier<GameState> {
   bool get hasError => state.errorMessage != null;
   String? get errorMessage => state.errorMessage;
 
-  // 評価を送信（新しいSimpleRating対応）
+  // 評価を送信（バッチ処理対応）
   Future<SubmissionResult> submitRating(SimpleRating rating) async {
     try {
-      print('GameViewModel - submitRating called');
-
-      // ローカルデータの場合は送信しない
+      // ローカルデータの場合はバッチに追加せずスキップ
       if (rating.wordId.startsWith('local_')) {
-        print('GameViewModel - Local data detected, skipping save');
-        return const SubmissionResult.success('評価を送信しました！');
+        return const SubmissionResult.success('評価を保存しました！');
       }
 
-      print('GameViewModel - Sending to Supabase...');
-      // Supabaseのワードの場合のみ送信を試みる
-      try {
-        await _repository.submitRating(rating);
-        print('GameViewModel - Successfully sent to Supabase');
-        return const SubmissionResult.success('評価を送信しました！');
-      } catch (e) {
-        // 通信エラーなどの場合は静かにローカルモードとして処理
-        print(
-          'GameViewModel - Error sending to Supabase, treating as local: $e',
-        );
-        return const SubmissionResult.success('評価を送信しました！');
+      // バッチ処理用にローカル保存
+      await RatingBatchService.savePendingRating(rating);
+      
+      // ゲーム状態に追加
+      final updatedPendingRatings = [...state.pendingRatings, rating];
+      state = state.copyWith(pendingRatings: updatedPendingRatings);
+
+      // ゲーム終了時（10問目完了）にバッチ送信
+      if (isLastQuestion && updatedPendingRatings.length >= state.totalQuestions) {
+        await _processBatchSubmission();
+      }
+
+      return const SubmissionResult.success('評価を保存しました！');
+    } catch (e) {
+      // エラーが発生してもユーザー体験を損なわない
+      // Debug: print('GameViewModel - Error in submitRating: $e');
+      return const SubmissionResult.success('評価を保存しました！');
+    }
+  }
+
+  // バッチ送信処理
+  Future<void> _processBatchSubmission() async {
+    try {
+      print('GameViewModel - Starting batch submission process');
+      
+      final pendingRatings = await RatingBatchService.getPendingRatings();
+      
+      if (pendingRatings.isEmpty) {
+        print('GameViewModel - No pending ratings to submit');
+        return;
+      }
+
+      print('GameViewModel - Submitting batch of ${pendingRatings.length} ratings');
+      
+      final result = await _repository.submitBatchRatings(pendingRatings);
+      
+      if (result.isComplete) {
+        // 全て成功
+        await RatingBatchService.clearPendingRatings();
+        state = state.copyWith(pendingRatings: []);
+        print('GameViewModel - Batch submission completed successfully');
+      } else {
+        // 部分的成功
+        await RatingBatchService.updatePendingRatings(result.failed);
+        state = state.copyWith(pendingRatings: result.failed);
+        print('GameViewModel - Batch submission partially completed: ${result.succeeded.length} succeeded, ${result.failed.length} failed');
       }
     } catch (e) {
-      print('GameViewModel - Unexpected error: $e');
-      // 予期せぬエラーの場合も静かにローカルモードとして処理
-      return const SubmissionResult.success('評価を送信しました！');
+      print('GameViewModel - Error in batch submission: $e');
+      // バッチ送信エラーは静かに処理（次回リトライされる）
     }
+  }
+
+
+  // 未送信評価数を取得
+  Future<int> getPendingRatingsCount() async {
+    return await _repository.getPendingRatingsCount();
   }
 
   // 現在のワードを取得

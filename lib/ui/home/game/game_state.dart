@@ -1,6 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import 'package:katakanahanashi/domain/repository/katakana_word.dart';
+import '../../../data/models/simple_rating.dart';
 
 part 'game_state.freezed.dart';
 
@@ -14,6 +15,7 @@ class GameState with _$GameState {
     @Default(false) bool isSubmitting,
     String? errorMessage,
     @Default([]) List<UsedWord> recentlyUsedWords, // 最近使用されたワード
+    @Default([]) List<SimpleRating> pendingRatings, // バッチ送信待ちの評価
   }) = _GameState;
 }
 

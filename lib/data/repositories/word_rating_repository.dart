@@ -4,6 +4,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/simple_rating.dart';
 import '../models/word_rating.dart';
 import '../services/supabase_service.dart';
+import '../services/rating_batch_service.dart';
 import '../../domain/repository/katakana_word.dart';
 
 // カスタム例外クラス
@@ -37,8 +38,6 @@ class WordRatingRepository {
   // 評価を送信（直接wordsテーブルを更新）
   Future<void> submitRating(SimpleRating rating) async {
     try {
-      print('Repository - Submitting rating for wordId: ${rating.wordId}');
-
       // RPC関数を使用して更新（SQLインジェクション対策）
       await _supabase
           .rpc(
@@ -57,8 +56,6 @@ class WordRatingRepository {
               const Duration(seconds: 1),
             ),
           );
-
-      print('Repository - Successfully updated word stats');
     } on TimeoutException {
       throw const NetworkException('通信がタイムアウトしました。ネットワーク接続を確認してください。');
     } on PostgrestException catch (e) {
@@ -182,5 +179,30 @@ class WordRatingRepository {
     } catch (e) {
       throw Exception('ワード統計の取得に失敗しました: $e');
     }
+  }
+
+  // バッチ評価送信
+  Future<BatchSubmissionResult> submitBatchRatings(List<SimpleRating> ratings) async {
+    return await RatingBatchService.submitBatch(ratings, this);
+  }
+
+  // 未送信評価のリトライ
+  Future<void> retryPendingRatings() async {
+    try {
+      await RatingBatchService.retryFailedSubmissions(this);
+    } catch (e) {
+      print('Repository - Error retrying pending ratings: $e');
+      // リトライ失敗は静かに処理（ゲーム体験に影響させない）
+    }
+  }
+
+  // 未送信評価数の取得
+  Future<int> getPendingRatingsCount() async {
+    return await RatingBatchService.getPendingRatingsCount();
+  }
+
+  // 未送信評価があるかチェック
+  Future<bool> hasPendingRatings() async {
+    return await RatingBatchService.hasPendingRatings();
   }
 }
