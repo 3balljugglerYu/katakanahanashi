@@ -23,6 +23,13 @@ class SubmissionResult {
 
 class GameViewModel extends StateNotifier<GameState> {
   final WordRatingRepository _repository;
+  
+  // 定数
+  static const int _totalQuestions = 10;
+  static const String _localWordPrefix = 'local_';
+  static const String _systemCategory = 'システム';
+  static const String _errorWord = 'エラー';
+  static const String _networkErrorMessage = 'ネットワークエラーのためローカルデータを使用します';
 
   GameViewModel(this._repository) : super(const GameState()) {
     _initializeGame();
@@ -49,54 +56,31 @@ class GameViewModel extends StateNotifier<GameState> {
     );
 
     try {
-      // Supabaseからワードを取得
-      final wordsFromDb = await _repository.getWords();
+      final gameWords = await _repository.getWordsForGame();
 
-      if (wordsFromDb.isNotEmpty) {
-        // データベースにワードがある場合は重複防止を適用
-        await _useDatabaseWords(wordsFromDb);
-      } else {
-        // データベースが空の場合はローカルデータを使用（重複防止なし）
-        _useLocalWords();
-      }
+      state = state.copyWith(
+        shuffledWords: gameWords.take(_totalQuestions).toList(),
+        isLoading: false,
+        currentQuestionIndex: 0,
+      );
+
+      print(
+        'GameViewModel - New game started with ${gameWords.take(state.totalQuestions).length} words',
+      );
     } catch (e) {
-      // エラーの場合もローカルデータを使用（重複防止なし）
+      // エラーの場合はローカルデータを使用
       _useLocalWords();
-      state = state.copyWith(errorMessage: 'ネットワークエラーのためローカルデータを使用します');
+      state = state.copyWith(errorMessage: _networkErrorMessage);
     }
   }
 
-  Future<void> _useDatabaseWords(List<KatakanaWord> wordsFromDb) async {
-    // データベースの総ワード数を保存
-    await WordDuplicationService.setTotalDbWordsCount(wordsFromDb.length);
-
-    // 重複防止フィルタリングを適用
-    final availableWords = await WordDuplicationService.filterAvailableWords(
-      wordsFromDb,
-      (word) => word.id ?? '',
-    );
-
-    // シャッフルして選択
-    final shuffled = [...availableWords];
-    shuffled.shuffle(Random());
-
-    state = state.copyWith(
-      shuffledWords: shuffled.take(state.totalQuestions).toList(),
-      isLoading: false,
-      currentQuestionIndex: 0, // 確実に0から開始
-    );
-
-    print(
-      'GameViewModel - New game started with ${shuffled.take(state.totalQuestions).length} words, currentQuestionIndex: 0',
-    );
-  }
 
   void _useLocalWords() {
     final shuffled = [...katakanaWords];
     shuffled.shuffle(Random());
 
     state = state.copyWith(
-      shuffledWords: shuffled.take(state.totalQuestions).toList(),
+      shuffledWords: shuffled.take(_totalQuestions).toList(),
       isLoading: false,
       currentQuestionIndex: 0, // 確実に0から開始
     );
@@ -187,7 +171,7 @@ class GameViewModel extends StateNotifier<GameState> {
   }
 
   bool get isLastQuestion =>
-      state.currentQuestionIndex >= state.totalQuestions - 1;
+      state.currentQuestionIndex >= _totalQuestions - 1;
 
   void resetGame() {
     state = const GameState();
@@ -208,7 +192,7 @@ class GameViewModel extends StateNotifier<GameState> {
   Future<SubmissionResult> submitRating(SimpleRating rating) async {
     try {
       // ローカルデータの場合はバッチに追加せずスキップ
-      if (rating.wordId.startsWith('local_')) {
+      if (rating.wordId.startsWith(_localWordPrefix)) {
         return const SubmissionResult.success('評価を保存しました！');
       }
 
@@ -220,7 +204,7 @@ class GameViewModel extends StateNotifier<GameState> {
       state = state.copyWith(pendingRatings: updatedPendingRatings);
 
       // ゲーム終了時（10問目完了）にバッチ送信
-      if (isLastQuestion && updatedPendingRatings.length >= state.totalQuestions) {
+      if (isLastQuestion && updatedPendingRatings.length >= _totalQuestions) {
         await _processBatchSubmission();
       }
 
@@ -286,7 +270,7 @@ class GameViewModel extends StateNotifier<GameState> {
 
     // 空の場合は緊急用のダミーワードを返す
     if (state.shuffledWords.isEmpty) {
-      return const KatakanaWord(word: 'エラー', category: 'システム');
+      return const KatakanaWord(word: _errorWord, category: _systemCategory);
     }
 
     return state.shuffledWords.first;
