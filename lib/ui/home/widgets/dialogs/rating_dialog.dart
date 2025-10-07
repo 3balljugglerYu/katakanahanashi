@@ -45,6 +45,7 @@ class RatingDialog extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final selectedDifficulty = useState<Difficulty?>(null);
     final selectedGoodBad = useState<bool?>(null);
+    final isSubmitting = useState<bool>(false);
 
     return Container(
       constraints: _isTablet(context)
@@ -265,9 +266,13 @@ class RatingDialog extends HookConsumerWidget {
 
           // 送信ボタン
           ElevatedButton(
-            onPressed: selectedDifficulty.value == null
+            onPressed: selectedDifficulty.value == null || isSubmitting.value
                 ? null
                 : () {
+                    // 連続タップ防止
+                    if (isSubmitting.value) return;
+                    isSubmitting.value = true;
+
                     final rating = SimpleRating(
                       wordId: word.id ?? 'local_${word.word}', // ローカル用の仮ID
                       difficulty: selectedDifficulty.value!,
@@ -285,13 +290,35 @@ class RatingDialog extends HookConsumerWidget {
                 borderRadius: BorderRadius.circular(20),
               ),
             ),
-            child: Text(
-              '決定',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: _getResponsiveFontSize(context, 0.035),
-              ),
-            ),
+            child: isSubmitting.value
+                ? Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      SizedBox(
+                        width: _getResponsiveFontSize(context, 0.035),
+                        height: _getResponsiveFontSize(context, 0.035),
+                        child: const CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2,
+                        ),
+                      ),
+                      SizedBox(width: _getResponsiveSpacing(context, 0.01)),
+                      Text(
+                        '送信中...',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: _getResponsiveFontSize(context, 0.035),
+                        ),
+                      ),
+                    ],
+                  )
+                : Text(
+                    '決定',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: _getResponsiveFontSize(context, 0.035),
+                    ),
+                  ),
           ),
         ],
       ),
