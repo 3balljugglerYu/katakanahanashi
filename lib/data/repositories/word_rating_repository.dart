@@ -217,9 +217,9 @@ class WordRatingRepository {
           .from('words')
           .select()
           .eq('total_rating_count', 0)
-          .order('word')
+          .order('RANDOM()')
           .limit(limit),
-      shuffle: true,
+      shuffle: false, // サーバー側でランダムなのでクライアント側シャッフル不要
     );
   }
 
@@ -237,7 +237,7 @@ class WordRatingRepository {
           .select()
           .gt('total_rating_count', 0)
           .order('total_rating_count', ascending: true)
-          .order('word')
+          .order('RANDOM()') // 同じtotal_rating_count内でランダム
           .limit(fetchLimit),
       shuffle: false,
     );
@@ -344,8 +344,8 @@ class WordRatingRepository {
       !usedWordIds.contains(word.id ?? '')).toList();
     
     if (unusedWords.length >= _gameWordsSelection) {
-      // 未使用ワードで10件確保
-      return unusedWords.take(_gameWordsSelection).toList()..shuffle();
+      // 未使用ワードで10件確保（サーバー側でランダムなのでシャッフル不要）
+      return unusedWords.take(_gameWordsSelection).toList();
     } else {
       // 重複許可モード: 未使用全部 + 足りない分を使用済みから追加
       final gameWords = [...unusedWords];
@@ -355,6 +355,7 @@ class WordRatingRepository {
       final needMore = _gameWordsSelection - unusedWords.length;
       
       gameWords.addAll(usedWords.take(needMore));
+      // 混合時のみシャッフル（未使用と使用済みが混在するため）
       return gameWords..shuffle();
     }
   }
