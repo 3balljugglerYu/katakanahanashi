@@ -23,7 +23,9 @@ mixin _$GameState {
   bool get isLoading => throw _privateConstructorUsedError;
   bool get isSubmitting => throw _privateConstructorUsedError;
   String? get errorMessage => throw _privateConstructorUsedError;
-  List<UsedWord> get recentlyUsedWords => throw _privateConstructorUsedError;
+  List<UsedWord> get recentlyUsedWords =>
+      throw _privateConstructorUsedError; // 最近使用されたワード
+  List<SimpleRating> get pendingRatings => throw _privateConstructorUsedError;
 
   /// Create a copy of GameState
   /// with the given fields replaced by the non-null parameter values.
@@ -45,6 +47,7 @@ abstract class $GameStateCopyWith<$Res> {
     bool isSubmitting,
     String? errorMessage,
     List<UsedWord> recentlyUsedWords,
+    List<SimpleRating> pendingRatings,
   });
 }
 
@@ -70,6 +73,7 @@ class _$GameStateCopyWithImpl<$Res, $Val extends GameState>
     Object? isSubmitting = null,
     Object? errorMessage = freezed,
     Object? recentlyUsedWords = null,
+    Object? pendingRatings = null,
   }) {
     return _then(
       _value.copyWith(
@@ -101,6 +105,10 @@ class _$GameStateCopyWithImpl<$Res, $Val extends GameState>
                 ? _value.recentlyUsedWords
                 : recentlyUsedWords // ignore: cast_nullable_to_non_nullable
                       as List<UsedWord>,
+            pendingRatings: null == pendingRatings
+                ? _value.pendingRatings
+                : pendingRatings // ignore: cast_nullable_to_non_nullable
+                      as List<SimpleRating>,
           )
           as $Val,
     );
@@ -124,6 +132,7 @@ abstract class _$$GameStateImplCopyWith<$Res>
     bool isSubmitting,
     String? errorMessage,
     List<UsedWord> recentlyUsedWords,
+    List<SimpleRating> pendingRatings,
   });
 }
 
@@ -148,6 +157,7 @@ class __$$GameStateImplCopyWithImpl<$Res>
     Object? isSubmitting = null,
     Object? errorMessage = freezed,
     Object? recentlyUsedWords = null,
+    Object? pendingRatings = null,
   }) {
     return _then(
       _$GameStateImpl(
@@ -179,6 +189,10 @@ class __$$GameStateImplCopyWithImpl<$Res>
             ? _value._recentlyUsedWords
             : recentlyUsedWords // ignore: cast_nullable_to_non_nullable
                   as List<UsedWord>,
+        pendingRatings: null == pendingRatings
+            ? _value._pendingRatings
+            : pendingRatings // ignore: cast_nullable_to_non_nullable
+                  as List<SimpleRating>,
       ),
     );
   }
@@ -195,8 +209,10 @@ class _$GameStateImpl implements _GameState {
     this.isSubmitting = false,
     this.errorMessage,
     final List<UsedWord> recentlyUsedWords = const [],
+    final List<SimpleRating> pendingRatings = const [],
   }) : _shuffledWords = shuffledWords,
-       _recentlyUsedWords = recentlyUsedWords;
+       _recentlyUsedWords = recentlyUsedWords,
+       _pendingRatings = pendingRatings;
 
   final List<KatakanaWord> _shuffledWords;
   @override
@@ -231,9 +247,20 @@ class _$GameStateImpl implements _GameState {
     return EqualUnmodifiableListView(_recentlyUsedWords);
   }
 
+  // 最近使用されたワード
+  final List<SimpleRating> _pendingRatings;
+  // 最近使用されたワード
+  @override
+  @JsonKey()
+  List<SimpleRating> get pendingRatings {
+    if (_pendingRatings is EqualUnmodifiableListView) return _pendingRatings;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_pendingRatings);
+  }
+
   @override
   String toString() {
-    return 'GameState(shuffledWords: $shuffledWords, currentQuestionIndex: $currentQuestionIndex, totalQuestions: $totalQuestions, isLoading: $isLoading, isSubmitting: $isSubmitting, errorMessage: $errorMessage, recentlyUsedWords: $recentlyUsedWords)';
+    return 'GameState(shuffledWords: $shuffledWords, currentQuestionIndex: $currentQuestionIndex, totalQuestions: $totalQuestions, isLoading: $isLoading, isSubmitting: $isSubmitting, errorMessage: $errorMessage, recentlyUsedWords: $recentlyUsedWords, pendingRatings: $pendingRatings)';
   }
 
   @override
@@ -258,6 +285,10 @@ class _$GameStateImpl implements _GameState {
             const DeepCollectionEquality().equals(
               other._recentlyUsedWords,
               _recentlyUsedWords,
+            ) &&
+            const DeepCollectionEquality().equals(
+              other._pendingRatings,
+              _pendingRatings,
             ));
   }
 
@@ -271,6 +302,7 @@ class _$GameStateImpl implements _GameState {
     isSubmitting,
     errorMessage,
     const DeepCollectionEquality().hash(_recentlyUsedWords),
+    const DeepCollectionEquality().hash(_pendingRatings),
   );
 
   /// Create a copy of GameState
@@ -291,6 +323,7 @@ abstract class _GameState implements GameState {
     final bool isSubmitting,
     final String? errorMessage,
     final List<UsedWord> recentlyUsedWords,
+    final List<SimpleRating> pendingRatings,
   }) = _$GameStateImpl;
 
   @override
@@ -306,7 +339,9 @@ abstract class _GameState implements GameState {
   @override
   String? get errorMessage;
   @override
-  List<UsedWord> get recentlyUsedWords;
+  List<UsedWord> get recentlyUsedWords; // 最近使用されたワード
+  @override
+  List<SimpleRating> get pendingRatings;
 
   /// Create a copy of GameState
   /// with the given fields replaced by the non-null parameter values.
