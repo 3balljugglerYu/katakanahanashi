@@ -117,7 +117,7 @@ class OnboardingPage extends ConsumerWidget {
       // 1ページ目: アプリの紹介
       PageViewModel(
         title: "ことばかくれんぼへ\nようこそ！",
-        body: "カタカナ禁止のことば遊びゲームです。\n\n遊びながら日本語の言い換え力を鍛えましょう！",
+        body: "2人以上で遊ぶカタカナ禁止のことば遊びゲームです。\n\n出題者を1人決めて、遊びましょう！",
         image: _buildImageWidget(
           context,
           imagePath: 'assets/images/tutorial_1.png',
@@ -146,7 +146,8 @@ class OnboardingPage extends ConsumerWidget {
         title: "評価して次の「お題」へ！",
         body:
             "評価をつけて、[決定]をタップすると次のお題に進みます！\n"
-            "評価は、このアプリをより良くする為に利用させて頂きます。",
+            "評価は、このアプリをより良くする為に利用させて頂きます。\n\n"
+            "この時、出題者を交代してもOKです！",
         image: _buildImageWidget(
           context,
           imagePath: 'assets/images/tutorial_3.png',
