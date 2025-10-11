@@ -7,6 +7,7 @@ import '../services/supabase_service.dart';
 import '../services/rating_batch_service.dart';
 import '../services/word_duplication_service.dart';
 import '../../domain/repository/katakana_word.dart';
+import '../../config/app_config.dart';
 
 // カスタム例外クラス
 class NetworkException implements Exception {
@@ -39,9 +40,13 @@ class WordRatingRepository {
   static const int _gameWordsTarget = 20;
   static const int _gameWordsSelection = 10;
 
-  // 評価を送信（直接wordsテーブルを更新）
+  // 評価を送信
   Future<void> submitRating(SimpleRating rating) async {
     try {
+      if (AppConfig.isDebugMode) {
+        print('Repository - Submitting rating for word: ${rating.wordId}, difficulty: ${rating.difficulty.name}, good: ${rating.isGood}, bad: ${rating.isBad}');
+      }
+      
       // RPC関数を使用して更新（SQLインジェクション対策）
       await _supabase
           .rpc(
@@ -60,15 +65,14 @@ class WordRatingRepository {
               const Duration(seconds: 1),
             ),
           );
+      
     } on TimeoutException {
       throw const NetworkException('通信がタイムアウトしました。ネットワーク接続を確認してください。');
     } on PostgrestException catch (e) {
-      print('Repository - Database error: ${e.message}');
       throw DatabaseException('データベースエラーが発生しました: ${e.message}');
     } on SocketException {
       throw const NetworkException('インターネット接続がありません。接続を確認してください。');
     } catch (e) {
-      print('Repository - Unexpected error: $e');
       throw UnknownException('予期しないエラーが発生しました: ${e.toString()}');
     }
   }
@@ -94,12 +98,10 @@ class WordRatingRepository {
     } on TimeoutException {
       throw const NetworkException('通信がタイムアウトしました。ネットワーク接続を確認してください。');
     } on PostgrestException catch (e) {
-      print('Repository - Database error: ${e.message}');
       throw DatabaseException('データベースエラーが発生しました: ${e.message}');
     } on SocketException {
       throw const NetworkException('インターネット接続がありません。接続を確認してください。');
     } catch (e) {
-      print('Repository - Unexpected error: $e');
       throw UnknownException('予期しないエラーが発生しました: ${e.toString()}');
     }
   }
@@ -195,7 +197,6 @@ class WordRatingRepository {
     try {
       await RatingBatchService.retryFailedSubmissions(this);
     } catch (e) {
-      print('Repository - Error retrying pending ratings: $e');
       // リトライ失敗は静かに処理（ゲーム体験に影響させない）
     }
   }
@@ -212,77 +213,28 @@ class WordRatingRepository {
 
   // 完全未評価ワード取得（total_rating_count = 0）
   Future<List<KatakanaWord>> getUnratedWords({int limit = 20}) async {
-    return _executeQuery(
-      () => _supabase
-          .from('words')
-          .select()
-          .eq('total_rating_count', 0)
-          .order('RANDOM()')
-          .limit(limit),
-      shuffle: false, // サーバー側でランダムなのでクライアント側シャッフル不要
-    );
-  }
-
-  // 評価カウント合計が少ない順でワード取得
-  Future<List<KatakanaWord>> getWordsByTotalRatingCountAsc({
-    required int limit,
-    List<String> excludeIds = const [],
-  }) async {
-    // 除外IDがある場合は少し多めに取得してクライアントサイドでフィルタリング
-    final fetchLimit = excludeIds.isNotEmpty ? limit + excludeIds.length : limit;
-    
-    final words = await _executeQuery(
-      () => _supabase
-          .from('words')
-          .select()
-          .gt('total_rating_count', 0)
-          .order('total_rating_count', ascending: true)
-          .order('RANDOM()') // 同じtotal_rating_count内でランダム
-          .limit(fetchLimit),
-      shuffle: false,
-    );
-
-    return _filterAndLimitWords(words, excludeIds, limit);
-  }
-
-  // 新しいゲーム用ワード取得
-  Future<List<KatakanaWord>> getWordsForGame() async {
     try {
-      // 1. total_rating_count = 0 のワードをランダムで20件取得
-      final unratedWords = await getUnratedWords(limit: 20);
-      
-      // 2. 不足分をtotal_rating_countが少ない順で補完
-      final allWords = await _fillWordsToTarget(
-        unratedWords, 
-        targetCount: 20,
-      );
-      
-      // 3. 端末キャッシュとの照合と選択
-      return await _selectGameWordsFromPool(allWords);
-    } catch (e) {
-      rethrow; // GameViewModelでキャッチしてローカルフォールバック
-    }
-  }
-
-  // 共通のクエリ実行処理
-  Future<List<KatakanaWord>> _executeQuery(
-    Future<dynamic> Function() queryBuilder, {
-    bool shuffle = false,
-  }) async {
-    try {
-      final response = await queryBuilder().timeout(
-        const Duration(seconds: _queryTimeoutSeconds),
-        onTimeout: () => throw TimeoutException(
-          'データ取得がタイムアウトしました',
-          const Duration(seconds: _queryTimeoutSeconds),
-        ),
-      );
+      if (AppConfig.isDebugMode) {
+        print('Repository - Getting random unrated words with limit: $limit');
+      }
+      final response = await _supabase
+          .rpc('get_random_unrated_words', params: {'word_limit': limit})
+          .timeout(
+            const Duration(seconds: _queryTimeoutSeconds),
+            onTimeout: () => throw TimeoutException(
+              'データ取得がタイムアウトしました',
+              const Duration(seconds: _queryTimeoutSeconds),
+            ),
+          );
 
       final words = (response as List)
           .map((json) => KatakanaWord.fromJson(json))
           .toList();
-
-      return shuffle ? (words..shuffle()) : words;
+      
+      if (AppConfig.isDebugMode) {
+        print('Repository - Retrieved ${words.length} random unrated words');
+      }
+      return words;
     } on TimeoutException {
       throw const NetworkException('通信がタイムアウトしました。ネットワーク接続を確認してください。');
     } on PostgrestException catch (e) {
@@ -294,26 +246,66 @@ class WordRatingRepository {
     }
   }
 
-  // ワードのフィルタリングと制限
-  List<KatakanaWord> _filterAndLimitWords(
-    List<KatakanaWord> words,
-    List<String> excludeIds,
-    int limit,
-  ) {
-    var filtered = words;
-    
-    // クライアントサイドで除外IDをフィルタリング
-    if (excludeIds.isNotEmpty) {
-      filtered = filtered.where((word) => !excludeIds.contains(word.id ?? '')).toList();
-    }
+  // 評価カウント合計が少ない順でワード取得
+  Future<List<KatakanaWord>> getWordsByTotalRatingCountAsc({
+    required int limit,
+    List<String> excludeIds = const [],
+  }) async {
+    try {
+      if (AppConfig.isDebugMode) {
+        print('Repository - Getting random low rated words with limit: $limit, excludeIds: ${excludeIds.length}');
+      }
+      final response = await _supabase
+          .rpc('get_random_low_rated_words', params: {
+            'word_limit': limit,
+            'exclude_ids': excludeIds.isNotEmpty ? excludeIds : null,
+          })
+          .timeout(
+            const Duration(seconds: _queryTimeoutSeconds),
+            onTimeout: () => throw TimeoutException(
+              'データ取得がタイムアウトしました',
+              const Duration(seconds: _queryTimeoutSeconds),
+            ),
+          );
 
-    // 必要な件数まで絞り込み
-    if (filtered.length > limit) {
-      filtered = filtered.take(limit).toList();
+      final words = (response as List)
+          .map((json) => KatakanaWord.fromJson(json))
+          .toList();
+      
+      if (AppConfig.isDebugMode) {
+        print('Repository - Retrieved ${words.length} random low rated words');
+      }
+      return words;
+    } on TimeoutException {
+      throw const NetworkException('通信がタイムアウトしました。ネットワーク接続を確認してください。');
+    } on PostgrestException catch (e) {
+      throw DatabaseException('データベースエラーが発生しました: ${e.message}');
+    } on SocketException {
+      throw const NetworkException('インターネット接続がありません。接続を確認してください。');
+    } catch (e) {
+      throw UnknownException('予期しないエラーが発生しました: ${e.toString()}');
     }
-
-    return filtered..shuffle();
   }
+
+  // 新しいゲーム用ワード取得
+  Future<List<KatakanaWord>> getWordsForGame() async {
+    try {
+      // 1. total_rating_count = 0 のワードをランダムで20件取得
+      final unratedWords = await getUnratedWords(limit: 20);
+      
+      // 2. 不足分をtotal_rating_countが少ない順で補完
+      final allWords = await _fillWordsToTarget(
+        unratedWords, 
+        targetCount: _gameWordsTarget,
+      );
+      
+      // 3. 端末キャッシュとの照合と選択
+      return await _selectGameWordsFromPool(allWords);
+    } catch (e) {
+      rethrow; // GameViewModelでキャッチしてローカルフォールバック
+    }
+  }
+
 
   // 目標件数まで補完
   Future<List<KatakanaWord>> _fillWordsToTarget(

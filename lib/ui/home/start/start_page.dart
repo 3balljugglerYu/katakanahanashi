@@ -5,6 +5,8 @@ import 'package:katakanahanashi/navigator/app_router.dart';
 import 'package:katakanahanashi/ui/home/game/game_view_model.dart';
 import 'package:katakanahanashi/ui/home/widgets/background/particle_background.dart';
 import 'package:katakanahanashi/ui/onboarding/onboarding_page.dart';
+import 'package:katakanahanashi/data/services/supabase_service.dart';
+import 'package:katakanahanashi/config/app_config.dart';
 
 class StartPage extends ConsumerWidget {
   const StartPage({super.key});
@@ -79,17 +81,9 @@ class StartPage extends ConsumerWidget {
                 ),
                 const SizedBox(height: 60),
                 ElevatedButton(
-                  onPressed: () {
-                    // GameViewModelをリセットしてから新しいゲームを開始
-                    final gameViewModel = ref.read(
-                      gameViewModelProvider.notifier,
-                    );
-                    gameViewModel.resetGame();
-                    print(
-                      'StartPage - Reset GameViewModel and starting new game',
-                    );
-
-                    Navigator.pushNamed(context, AppRouter.gameRoute);
+                  onPressed: () async {
+                    // Supabase接続確認を実行
+                    await _checkSupabaseConnectionAndStart(context, ref);
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.orange,
@@ -229,5 +223,159 @@ class StartPage extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  /// Supabase接続確認とゲーム開始処理
+  Future<void> _checkSupabaseConnectionAndStart(BuildContext context, WidgetRef ref) async {
+    // 接続確認中のローディングダイアログを表示
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(Colors.orange),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'お題を作成中...',
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.orange.shade700,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    try {
+      // Supabase接続テスト（3秒でタイムアウト）
+      final isConnected = await SupabaseService.checkConnection()
+          .timeout(
+            const Duration(seconds: 3),
+            onTimeout: () => false,
+          );
+      
+      // ローディングダイアログを閉じる
+      if (context.mounted) {
+        Navigator.of(context).pop();
+      }
+
+      if (isConnected) {
+        // 接続成功：ゲーム開始
+        await _startGame(context, ref, true);
+      } else {
+        // 接続失敗：警告ダイアログを表示
+        await _showConnectionWarningDialog(context, ref);
+      }
+    } catch (e) {
+      // ローディングダイアログを閉じる
+      if (context.mounted) {
+        Navigator.of(context).pop();
+      }
+      
+      // エラー発生：警告ダイアログを表示
+      await _showConnectionWarningDialog(context, ref);
+    }
+  }
+
+  /// 接続警告ダイアログを表示
+  Future<void> _showConnectionWarningDialog(BuildContext context, WidgetRef ref) async {
+    final connectionInfo = SupabaseService.getConnectionInfo();
+    
+    await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: [
+            Icon(Icons.warning, color: Colors.orange.shade600),
+            const SizedBox(width: 8),
+            Text('接続に関する通知'),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              AppConfig.isDebugMode
+                  ? 'Supabaseへの接続に問題があります。\n\nローカルデータでゲームを続行します。本番環境ではユーザー向けのテキストが表示されます。'
+                  : 'ネットワーク接続に問題があります。\n\nオフラインでゲームを続行できますが、同じ「お題」が表示される場合があります。',
+              style: const TextStyle(fontSize: 14),
+            ),
+            if (AppConfig.isDebugMode) ...[
+              const SizedBox(height: 12),
+              const Divider(),
+              const SizedBox(height: 8),
+              Text(
+                '接続情報:',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey.shade700,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text('URL: ${connectionInfo['url']}', style: const TextStyle(fontSize: 12)),
+              Text('API Key: ${connectionInfo['hasAnonKey']}', style: const TextStyle(fontSize: 12)),
+            ],
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('キャンセル'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              _startGame(context, ref, false);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.orange,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('続行'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// ゲーム開始処理
+  Future<void> _startGame(BuildContext context, WidgetRef ref, bool isSupabaseConnected) async {
+    // GameViewModelをリセットしてから新しいゲームを開始
+    final gameViewModel = ref.read(gameViewModelProvider.notifier);
+    gameViewModel.resetGame();
+    
+    print('StartPage - Reset GameViewModel and starting new game');
+    print('StartPage - Supabase connection status: $isSupabaseConnected');
+
+    if (context.mounted) {
+      // 接続成功の場合は成功メッセージを短時間表示（デバッグモードのみ）
+      if (isSupabaseConnected && AppConfig.isDebugMode) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                Icon(Icons.check_circle, color: Colors.white),
+                const SizedBox(width: 8),
+                const Text('Supabase接続成功！'),
+              ],
+            ),
+            backgroundColor: Colors.green,
+            duration: const Duration(seconds: 1),
+          ),
+        );
+        
+        // 少し遅延してからゲーム画面に遷移
+        await Future.delayed(const Duration(milliseconds: 800));
+      }
+      
+      Navigator.pushNamed(context, AppRouter.gameRoute);
+    }
   }
 }
