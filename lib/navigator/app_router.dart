@@ -4,12 +4,14 @@ import 'package:katakanahanashi/ui/home/game/game_page.dart';
 import 'package:katakanahanashi/ui/home/start/start_page.dart';
 import 'package:katakanahanashi/ui/onboarding/onboarding_page.dart';
 import 'package:katakanahanashi/ui/splash/splash_page.dart';
+import 'package:katakanahanashi/ui/subscription/subscription_page.dart';
 
 class AppRouter {
   static const String splashRoute = '/';
   static const String onboardingRoute = '/onboarding';
   static const String startRoute = '/start';
   static const String gameRoute = '/game';
+  static const String subscriptionRoute = '/subscription';
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
@@ -21,6 +23,8 @@ class AppRouter {
         return MaterialPageRoute(builder: (_) => const StartPage());
       case gameRoute:
         return MaterialPageRoute(builder: (_) => const GamePage());
+      case subscriptionRoute:
+        return MaterialPageRoute(builder: (_) => const SubscriptionPage());
       default:
         return MaterialPageRoute(
           builder: (_) =>
