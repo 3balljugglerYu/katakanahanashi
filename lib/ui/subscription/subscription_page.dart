@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'subscription_view_model.dart';
+import 'subscription_state.dart';
 
-class SubscriptionPage extends StatelessWidget {
+class SubscriptionPage extends ConsumerWidget {
   const SubscriptionPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final colorScheme = Theme.of(context).colorScheme;
+    final state = ref.watch(subscriptionViewModelProvider);
+    final viewModel = ref.read(subscriptionViewModelProvider.notifier);
 
     return Scaffold(
       appBar: AppBar(
@@ -23,9 +28,17 @@ class SubscriptionPage extends StatelessWidget {
               const SizedBox(height: 24),
               _buildBenefitSection(colorScheme),
               const SizedBox(height: 24),
-              _buildPriceCard(context),
+              _buildPriceCard(context, viewModel),
               const SizedBox(height: 24),
-              _buildActionButtons(context),
+              if (state.error != null) ...[
+                _buildErrorCard(state.error!, viewModel),
+                const SizedBox(height: 16),
+              ],
+              if (state.isSubscribed) ...[
+                _buildSubscribedCard(colorScheme),
+                const SizedBox(height: 16),
+              ],
+              _buildActionButtons(context, state, viewModel),
               const SizedBox(height: 16),
               _buildNote(),
             ],
@@ -178,7 +191,7 @@ class SubscriptionPage extends StatelessWidget {
     );
   }
 
-  Widget _buildPriceCard(BuildContext context) {
+  Widget _buildPriceCard(BuildContext context, SubscriptionViewModel viewModel) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
@@ -196,25 +209,25 @@ class SubscriptionPage extends StatelessWidget {
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: const [
-          Text(
+        children: [
+          const Text(
             'プラン',
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
             ),
           ),
-          SizedBox(height: 12),
+          const SizedBox(height: 12),
           Text(
-            '月額 200円',
-            style: TextStyle(
+            viewModel.priceText,
+            style: const TextStyle(
               fontSize: 28,
               fontWeight: FontWeight.bold,
               color: Colors.orange,
             ),
           ),
-          SizedBox(height: 8),
-          Text(
+          const SizedBox(height: 8),
+          const Text(
             'いつでも解約できます。解約しても請求期間の最後まで広告なしで利用できます。',
           ),
         ],
@@ -222,40 +235,79 @@ class SubscriptionPage extends StatelessWidget {
     );
   }
 
-  Widget _buildActionButtons(BuildContext context) {
+  Widget _buildActionButtons(BuildContext context, SubscriptionState state, SubscriptionViewModel viewModel) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         ElevatedButton(
-          onPressed: () {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('サブスク処理は実装準備中です。'),
-              ),
-            );
-          },
+          onPressed: viewModel.canPurchase ? () async {
+            try {
+              await viewModel.purchaseSubscription();
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('購入処理を開始しました'),
+                    backgroundColor: Colors.green,
+                  ),
+                );
+              }
+            } catch (e) {
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('購入に失敗しました: $e'),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              }
+            }
+          } : null,
           style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.orange,
+            backgroundColor: state.isSubscribed ? Colors.grey : Colors.orange,
             foregroundColor: Colors.white,
             padding: const EdgeInsets.symmetric(vertical: 14),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
             ),
           ),
-          child: const Text(
-            '購読して広告をオフにする',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-          ),
+          child: state.isLoading 
+            ? const SizedBox(
+                height: 20,
+                width: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                ),
+              )
+            : Text(
+                state.isSubscribed ? '購読済み' : '購読して広告をオフにする',
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
         ),
         const SizedBox(height: 12),
         OutlinedButton(
-          onPressed: () {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('購入情報の復元は実装準備中です。'),
-              ),
-            );
-          },
+          onPressed: viewModel.canRestore ? () async {
+            try {
+              await viewModel.restorePurchases();
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('購入情報の復元を開始しました'),
+                    backgroundColor: Colors.blue,
+                  ),
+                );
+              }
+            } catch (e) {
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('復元に失敗しました: $e'),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              }
+            }
+          } : null,
           style: OutlinedButton.styleFrom(
             foregroundColor: Colors.orange.shade800,
             side: BorderSide(color: Colors.orange.shade300, width: 1.5),
@@ -270,6 +322,52 @@ class SubscriptionPage extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildErrorCard(String error, SubscriptionViewModel viewModel) {
+    return Card(
+      color: Colors.red.shade50,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          children: [
+            Icon(Icons.error, color: Colors.red.shade700),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                error,
+                style: TextStyle(color: Colors.red.shade700),
+              ),
+            ),
+            IconButton(
+              onPressed: viewModel.clearError,
+              icon: const Icon(Icons.close),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSubscribedCard(ColorScheme colorScheme) {
+    return Card(
+      color: Colors.green.shade50,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          children: [
+            Icon(Icons.check_circle, color: Colors.green.shade700),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                'サブスクリプションが有効です\n広告なしでお楽しみください',
+                style: TextStyle(color: Colors.green.shade700),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
