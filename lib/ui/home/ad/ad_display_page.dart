@@ -2,24 +2,27 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:katakanahanashi/config/app_config.dart';
 import 'package:katakanahanashi/data/services/ad_service.dart';
 import 'package:katakanahanashi/navigator/app_router.dart';
 import 'package:katakanahanashi/ui/home/game/game_page.dart';
+import 'package:katakanahanashi/ui/subscription/subscription_view_model.dart';
 
-class AdDisplayPage extends StatefulWidget {
+class AdDisplayPage extends ConsumerStatefulWidget {
   const AdDisplayPage({super.key});
 
   @override
-  State<AdDisplayPage> createState() => _AdDisplayPageState();
+  ConsumerState<AdDisplayPage> createState() => _AdDisplayPageState();
 }
 
-class _AdDisplayPageState extends State<AdDisplayPage>
+class _AdDisplayPageState extends ConsumerState<AdDisplayPage>
     with TickerProviderStateMixin {
   InterstitialAd? _interstitialAd;
   bool _adLoaded = false;
   bool _showCloseButton = false;
   Timer? _closeButtonTimer;
+  bool _hasNavigated = false;
 
   late AnimationController _slideController;
   late Animation<Offset> _slideAnimation;
@@ -40,10 +43,31 @@ class _AdDisplayPageState extends State<AdDisplayPage>
           CurvedAnimation(parent: _slideController, curve: Curves.easeInOut),
         );
 
+    final initialSubscribed = ref
+        .read(subscriptionViewModelProvider)
+        .isSubscribed;
+    if (initialSubscribed) {
+      _scheduleReturnToTop();
+    } else {
+      _startAdFlow();
+    }
+
+    ref.listen(subscriptionViewModelProvider, (previous, next) {
+      final wasSubscribed = previous?.isSubscribed ?? false;
+      if (!wasSubscribed && next.isSubscribed) {
+        _scheduleReturnToTop();
+      }
+    });
+  }
+
+  void _startAdFlow() {
     _loadInterstitialAd();
 
     // 画面表示後、少し遅延してからスライドアニメーション開始
     Future.delayed(const Duration(milliseconds: 300), () {
+      if (!mounted || _hasNavigated) {
+        return;
+      }
       _slideController.forward();
     });
 
@@ -139,11 +163,30 @@ class _AdDisplayPageState extends State<AdDisplayPage>
   }
 
   void _navigateToTop() {
+    if (_hasNavigated) {
+      return;
+    }
+    _hasNavigated = true;
     Navigator.pushNamedAndRemoveUntil(
       context,
       AppRouter.startRoute,
       (route) => false,
     );
+  }
+
+  void _scheduleReturnToTop() {
+    if (_hasNavigated) {
+      return;
+    }
+    _closeButtonTimer?.cancel();
+    _interstitialAd?.dispose();
+    _interstitialAd = null;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) {
+        return;
+      }
+      _navigateToTop();
+    });
   }
 
   @override

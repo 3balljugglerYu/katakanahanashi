@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
@@ -7,12 +9,16 @@ import 'package:katakanahanashi/ui/home/widgets/background/particle_background.d
 import 'package:katakanahanashi/ui/onboarding/onboarding_page.dart';
 import 'package:katakanahanashi/data/services/supabase_service.dart';
 import 'package:katakanahanashi/config/app_config.dart';
+import 'package:katakanahanashi/ui/subscription/subscription_view_model.dart';
 
 class StartPage extends ConsumerWidget {
   const StartPage({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final subscriptionState = ref.watch(subscriptionViewModelProvider);
+    final isSubscribed = subscriptionState.isSubscribed;
+
     return Scaffold(
       backgroundColor: Colors.orange.shade50,
       body: Stack(
@@ -106,43 +112,76 @@ class StartPage extends ConsumerWidget {
                     ),
                   ),
                 ),
-                const SizedBox(height: 16),
-                TextButton(
-                  onPressed: () {
-                    Navigator.pushNamed(
-                      context,
-                      AppRouter.subscriptionRoute,
-                    );
-                  },
-                  style: TextButton.styleFrom(
-                    foregroundColor: Colors.orange.shade700,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8,
+                if (Platform.isIOS) ...[
+                  const SizedBox(height: 16),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pushNamed(context, AppRouter.subscriptionRoute);
+                    },
+                    style: TextButton.styleFrom(
+                      foregroundColor: Colors.orange.shade700,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.workspace_premium,
+                          size: 18,
+                          color: Colors.orange.shade700,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          isSubscribed ? '広告オフの状態を確認' : '広告なしで遊ぶ',
+                          style: TextStyle(
+                            fontSize: MediaQuery.of(context).size.width * 0.04,
+                            fontWeight: FontWeight.w600,
+                            decoration: TextDecoration.underline,
+                            decorationColor: Colors.orange.shade700,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.workspace_premium,
-                        size: 18,
-                        color: Colors.orange.shade700,
+                  if (isSubscribed) ...[
+                    const SizedBox(height: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
                       ),
-                      const SizedBox(width: 6),
-                      Text(
-                        '広告なしで遊ぶ',
-                        style: TextStyle(
-                          fontSize: MediaQuery.of(context).size.width * 0.04,
-                          fontWeight: FontWeight.w600,
-                          decoration: TextDecoration.underline,
-                          decorationColor: Colors.orange.shade700,
-                        ),
+                      decoration: BoxDecoration(
+                        color: Colors.orange.shade100,
+                        borderRadius: BorderRadius.circular(20),
                       ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 8),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.check_circle,
+                            size: 18,
+                            color: Colors.orange.shade700,
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            '広告オフが有効です',
+                            style: TextStyle(
+                              fontSize:
+                                  MediaQuery.of(context).size.width * 0.035,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.orange.shade700,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                  const SizedBox(height: 8),
+                ] else
+                  const SizedBox(height: 16),
                 // ルール再確認ボタン
                 TextButton(
                   onPressed: () {
@@ -262,7 +301,10 @@ class StartPage extends ConsumerWidget {
   }
 
   /// Supabase接続確認とゲーム開始処理
-  Future<void> _checkSupabaseConnectionAndStart(BuildContext context, WidgetRef ref) async {
+  Future<void> _checkSupabaseConnectionAndStart(
+    BuildContext context,
+    WidgetRef ref,
+  ) async {
     // 接続確認中のローディングダイアログを表示
     showDialog(
       context: context,
@@ -290,12 +332,11 @@ class StartPage extends ConsumerWidget {
 
     try {
       // Supabase接続テスト（3秒でタイムアウト）
-      final isConnected = await SupabaseService.checkConnection()
-          .timeout(
-            const Duration(seconds: 3),
-            onTimeout: () => false,
-          );
-      
+      final isConnected = await SupabaseService.checkConnection().timeout(
+        const Duration(seconds: 3),
+        onTimeout: () => false,
+      );
+
       // ローディングダイアログを閉じる
       if (context.mounted) {
         Navigator.of(context).pop();
@@ -313,16 +354,19 @@ class StartPage extends ConsumerWidget {
       if (context.mounted) {
         Navigator.of(context).pop();
       }
-      
+
       // エラー発生：警告ダイアログを表示
       await _showConnectionWarningDialog(context, ref);
     }
   }
 
   /// 接続警告ダイアログを表示
-  Future<void> _showConnectionWarningDialog(BuildContext context, WidgetRef ref) async {
+  Future<void> _showConnectionWarningDialog(
+    BuildContext context,
+    WidgetRef ref,
+  ) async {
     final connectionInfo = SupabaseService.getConnectionInfo();
-    
+
     await showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -355,8 +399,14 @@ class StartPage extends ConsumerWidget {
                 ),
               ),
               const SizedBox(height: 4),
-              Text('URL: ${connectionInfo['url']}', style: const TextStyle(fontSize: 12)),
-              Text('API Key: ${connectionInfo['hasAnonKey']}', style: const TextStyle(fontSize: 12)),
+              Text(
+                'URL: ${connectionInfo['url']}',
+                style: const TextStyle(fontSize: 12),
+              ),
+              Text(
+                'API Key: ${connectionInfo['hasAnonKey']}',
+                style: const TextStyle(fontSize: 12),
+              ),
             ],
           ],
         ),
@@ -382,11 +432,15 @@ class StartPage extends ConsumerWidget {
   }
 
   /// ゲーム開始処理
-  Future<void> _startGame(BuildContext context, WidgetRef ref, bool isSupabaseConnected) async {
+  Future<void> _startGame(
+    BuildContext context,
+    WidgetRef ref,
+    bool isSupabaseConnected,
+  ) async {
     // GameViewModelをリセットしてから新しいゲームを開始
     final gameViewModel = ref.read(gameViewModelProvider.notifier);
     gameViewModel.resetGame();
-    
+
     print('StartPage - Reset GameViewModel and starting new game');
     print('StartPage - Supabase connection status: $isSupabaseConnected');
 
@@ -406,11 +460,11 @@ class StartPage extends ConsumerWidget {
             duration: const Duration(seconds: 1),
           ),
         );
-        
+
         // 少し遅延してからゲーム画面に遷移
         await Future.delayed(const Duration(milliseconds: 800));
       }
-      
+
       Navigator.pushNamed(context, AppRouter.gameRoute);
     }
   }
