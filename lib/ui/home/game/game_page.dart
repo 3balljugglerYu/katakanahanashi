@@ -6,6 +6,7 @@ import 'package:katakanahanashi/data/services/ad_service.dart';
 import 'package:katakanahanashi/navigator/app_router.dart';
 import 'package:katakanahanashi/ui/home/congratulations/congratulations_page.dart';
 import 'package:katakanahanashi/ui/home/widgets/dialogs/rating_dialog.dart';
+import 'package:katakanahanashi/ui/subscription/subscription_view_model.dart';
 
 import 'game_view_model.dart';
 
@@ -19,6 +20,8 @@ class GamePage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final gameState = ref.watch(gameViewModelProvider);
     final gameViewModel = ref.read(gameViewModelProvider.notifier);
+    final subscriptionState = ref.watch(subscriptionViewModelProvider);
+    final isSubscribed = subscriptionState.isSubscribed;
 
     // ローディング状態を表示
     if (gameState.isLoading || gameState.shuffledWords.isEmpty) {
@@ -262,7 +265,8 @@ class GamePage extends ConsumerWidget {
               width: double.infinity,
               child: _NextButton(
                 isLastQuestion: gameViewModel.isLastQuestion,
-                onPressed: () => _handleNext(context, ref, gameViewModel),
+                onPressed: () =>
+                    _handleNext(context, ref, gameViewModel, isSubscribed),
               ),
             ),
             // レスポンシブ対応：画面サイズに応じて動的に調整
@@ -276,12 +280,13 @@ class GamePage extends ConsumerWidget {
   void _navigateToCongratulationsPage(
     NavigatorState navigator,
     GameViewModel gameViewModel,
+    bool isSubscribed,
   ) {
     // ゲーム終了処理を先に実行
     _proceedToGameEnd(gameViewModel);
 
     // 広告の事前読み込みを開始
-    _preloadInterstitialAd();
+    _preloadInterstitialAd(shouldLoad: !isSubscribed);
 
     if (!navigator.mounted) {
       return;
@@ -292,7 +297,12 @@ class GamePage extends ConsumerWidget {
     );
   }
 
-  static void _preloadInterstitialAd() {
+  static void _preloadInterstitialAd({required bool shouldLoad}) {
+    if (!shouldLoad) {
+      _preloadedAd = null;
+      return;
+    }
+
     print("広告の事前読み込みを開始します");
     // 本番環境ではデバッグ情報を出力しない（一時的に無効化）
     // if (AppConfig.isDebugMode) {
@@ -412,6 +422,7 @@ class GamePage extends ConsumerWidget {
     BuildContext context,
     WidgetRef ref,
     GameViewModel gameViewModel,
+    bool isSubscribed,
   ) {
     final currentWord = gameViewModel.currentWord;
     final navigator = Navigator.of(context, rootNavigator: true);
@@ -457,7 +468,11 @@ class GamePage extends ConsumerWidget {
 
           // 10問目の場合は広告案内ページに遷移
           if (isLastQuestion) {
-            _navigateToCongratulationsPage(navigator, gameViewModel);
+            _navigateToCongratulationsPage(
+              navigator,
+              gameViewModel,
+              isSubscribed,
+            );
           } else {
             _proceedToNext(context, gameViewModel);
           }

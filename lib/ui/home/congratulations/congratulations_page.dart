@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:katakanahanashi/navigator/app_router.dart';
 import 'package:katakanahanashi/ui/home/ad/ad_display_page.dart';
+import 'package:katakanahanashi/ui/subscription/subscription_view_model.dart';
 import 'congratulations_view_model.dart';
 import 'congratulations_state.dart';
 
@@ -135,15 +137,26 @@ class _CongratulationsPageState extends ConsumerState<CongratulationsPage>
       );
     }
 
-    return _CongratulationsContent(state: state, resources: resources);
+    final isSubscribed = ref.watch(subscriptionViewModelProvider).isSubscribed;
+
+    return _CongratulationsContent(
+      state: state,
+      resources: resources,
+      isSubscribed: isSubscribed,
+    );
   }
 }
 
 class _CongratulationsContent extends StatelessWidget {
   final CongratulationsState state;
   final CongratulationsResources resources;
+  final bool isSubscribed;
 
-  const _CongratulationsContent({required this.state, required this.resources});
+  const _CongratulationsContent({
+    required this.state,
+    required this.resources,
+    required this.isSubscribed,
+  });
 
   /// タブレット判定メソッド
   bool _isTablet(BuildContext context) {
@@ -282,11 +295,18 @@ class _CongratulationsContent extends StatelessWidget {
               right: MediaQuery.of(context).size.width * 0.05, // レスポンシブ対応の右マージン
               child: ElevatedButton(
                 onPressed: () {
-                  Navigator.of(context).pushReplacement(
-                    MaterialPageRoute(
-                      builder: (context) => const AdDisplayPage(),
-                    ),
-                  );
+                  if (isSubscribed) {
+                    Navigator.of(context).pushNamedAndRemoveUntil(
+                      AppRouter.startRoute,
+                      (route) => false,
+                    );
+                  } else {
+                    Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(
+                        builder: (context) => const AdDisplayPage(),
+                      ),
+                    );
+                  }
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.orange,

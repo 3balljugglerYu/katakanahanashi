@@ -78,6 +78,9 @@ dev_dependencies:
   # Flavor management
   flutter_flavorizr: ^2.2.3
 
+  # アプリ内課金(IAP)
+  in_app_purchase: ^3.2.3
+
 # The following section is specific to Flutter packages.
 flutter:
 
