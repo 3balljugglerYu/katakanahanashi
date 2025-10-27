@@ -10,7 +10,7 @@ class GameState with _$GameState {
   const factory GameState({
     @Default([]) List<KatakanaWord> shuffledWords,
     @Default(0) int currentQuestionIndex,
-    @Default(10) int totalQuestions,
+    @Default(5) int totalQuestions,
     @Default(false) bool isLoading,
     @Default(false) bool isSubmitting,
     String? errorMessage,

@@ -204,7 +204,7 @@ class _$GameStateImpl implements _GameState {
   const _$GameStateImpl({
     final List<KatakanaWord> shuffledWords = const [],
     this.currentQuestionIndex = 0,
-    this.totalQuestions = 10,
+    this.totalQuestions = 5,
     this.isLoading = false,
     this.isSubmitting = false,
     this.errorMessage,

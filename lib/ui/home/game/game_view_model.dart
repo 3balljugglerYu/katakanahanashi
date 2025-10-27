@@ -25,7 +25,7 @@ class GameViewModel extends StateNotifier<GameState> {
   final WordRatingRepository _repository;
   
   // 定数
-  static const int _totalQuestions = 10;
+  static const int _totalQuestions = 5;
   static const String _localWordPrefix = 'local_';
   static const String _systemCategory = 'システム';
   static const String _errorWord = 'エラー';
@@ -203,7 +203,7 @@ class GameViewModel extends StateNotifier<GameState> {
       final updatedPendingRatings = [...state.pendingRatings, rating];
       state = state.copyWith(pendingRatings: updatedPendingRatings);
 
-      // ゲーム終了時（10問目完了）にバッチ送信
+      // ゲーム終了時（最終問題完了）にバッチ送信
       if (isLastQuestion && updatedPendingRatings.length >= _totalQuestions) {
         await _processBatchSubmission();
       }

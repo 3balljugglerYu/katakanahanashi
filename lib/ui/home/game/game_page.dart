@@ -388,7 +388,7 @@ class GamePage extends ConsumerWidget {
       "_proceedToNext called. isLastQuestion: ${gameViewModel.isLastQuestion}",
     );
 
-    // 10問目の場合のみトップ画面に戻る
+    // 最終問題の場合のみトップ画面に戻る
     if (gameViewModel.isLastQuestion) {
       // 最後の問題の場合は、nextQuestion()を呼び出してからトップ画面に戻る
       // これにより最後のワードがSharedPreferencesに登録される
@@ -412,7 +412,7 @@ class GamePage extends ConsumerWidget {
         print("Context not mounted, cannot navigate");
       }
     } else {
-      // 1〜9問目の場合は次の問題に進む
+      // 最終問題以外の場合は次の問題に進む
       print("Moving to next question");
       gameViewModel.nextQuestion();
     }
@@ -428,8 +428,7 @@ class GamePage extends ConsumerWidget {
     final navigator = Navigator.of(context, rootNavigator: true);
 
     // 評価ダイアログを表示
-    final gameState = ref.read(gameViewModelProvider);
-    final isLastQuestion = gameState.currentQuestionIndex == 9;
+    final isLastQuestion = gameViewModel.isLastQuestion;
 
     showDialog<void>(
       context: context,
@@ -466,7 +465,7 @@ class GamePage extends ConsumerWidget {
             navigator.pop();
           }
 
-          // 10問目の場合は広告案内ページに遷移
+          // 最終問題の場合は広告案内ページに遷移
           if (isLastQuestion) {
             _navigateToCongratulationsPage(
               navigator,
