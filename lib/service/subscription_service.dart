@@ -1,5 +1,7 @@
 import 'dart:async';
 import 'dart:io';
+
+import 'package:flutter/services.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -52,6 +54,11 @@ class SubscriptionService {
         purchaseParam: purchaseParam,
       );
       return success;
+    } on PlatformException catch (e) {
+      if (e.code == 'purchase_cancelled') {
+        return false;
+      }
+      throw Exception('Purchase failed: ${e.message}');
     } catch (e) {
       throw Exception('Purchase failed: $e');
     }
@@ -87,6 +94,9 @@ class SubscriptionService {
 
       return true;
     } else if (purchaseDetails.status == PurchaseStatus.error) {
+      if (purchaseDetails.error?.code == 'purchase_cancelled') {
+        return false;
+      }
       // 購入エラー
       throw Exception('Purchase error: ${purchaseDetails.error?.message}');
     } else if (purchaseDetails.status == PurchaseStatus.canceled) {

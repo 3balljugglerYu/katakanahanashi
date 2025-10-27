@@ -8,25 +8,27 @@ final subscriptionServiceProvider = Provider<SubscriptionService>((ref) {
   return SubscriptionService();
 });
 
-final subscriptionViewModelProvider = StateNotifierProvider<SubscriptionViewModel, SubscriptionState>((ref) {
-  final service = ref.read(subscriptionServiceProvider);
-  return SubscriptionViewModel(service);
-});
+final subscriptionViewModelProvider =
+    StateNotifierProvider<SubscriptionViewModel, SubscriptionState>((ref) {
+      final service = ref.read(subscriptionServiceProvider);
+      return SubscriptionViewModel(service);
+    });
 
 class SubscriptionViewModel extends StateNotifier<SubscriptionState> {
   final SubscriptionService _subscriptionService;
   StreamSubscription<List<PurchaseDetails>>? _purchaseSubscription;
 
-  SubscriptionViewModel(this._subscriptionService) : super(const SubscriptionState()) {
+  SubscriptionViewModel(this._subscriptionService)
+    : super(const SubscriptionState()) {
     _initializeService();
   }
 
   Future<void> _initializeService() async {
     try {
       state = state.copyWith(isLoading: true, error: null);
-      
+
       await _subscriptionService.initialize();
-      
+
       // 購入ストリームの監視を開始
       _purchaseSubscription = _subscriptionService.purchaseStream.listen(
         _handlePurchaseUpdate,
@@ -37,13 +39,12 @@ class SubscriptionViewModel extends StateNotifier<SubscriptionState> {
           );
         },
       );
-      
+
       // 商品情報を取得
       await loadProducts();
-      
+
       // サブスクリプション状態を確認
       await checkSubscriptionStatus();
-      
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
@@ -55,9 +56,9 @@ class SubscriptionViewModel extends StateNotifier<SubscriptionState> {
   Future<void> loadProducts() async {
     try {
       state = state.copyWith(isLoading: true, error: null);
-      
+
       final products = await _subscriptionService.getProducts();
-      
+
       state = state.copyWith(
         isLoading: false,
         products: products,
@@ -79,30 +80,31 @@ class SubscriptionViewModel extends StateNotifier<SubscriptionState> {
 
     try {
       state = state.copyWith(isLoading: true, error: null);
-      
-      await _subscriptionService.purchaseSubscription(state.selectedProduct!);
-      
-      // 購入結果は _handlePurchaseUpdate で処理される
-    } catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        error: 'Purchase failed: $e',
+
+      final success = await _subscriptionService.purchaseSubscription(
+        state.selectedProduct!,
       );
+
+      if (!success) {
+        state = state.copyWith(isLoading: false);
+        return;
+      }
+
+      // 購入結果は _handlePurchaseUpdate で処理される（成功時）
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: 'Purchase failed: $e');
     }
   }
 
   Future<void> restorePurchases() async {
     try {
       state = state.copyWith(isLoading: true, error: null);
-      
+
       await _subscriptionService.restorePurchases();
-      
+
       // 復元結果は _handlePurchaseUpdate で処理される
     } catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        error: 'Restore failed: $e',
-      );
+      state = state.copyWith(isLoading: false, error: 'Restore failed: $e');
     }
   }
 
@@ -123,15 +125,21 @@ class SubscriptionViewModel extends StateNotifier<SubscriptionState> {
 
   Future<void> _processPurchase(PurchaseDetails purchaseDetails) async {
     try {
-      final success = await _subscriptionService.handlePurchaseUpdate(purchaseDetails);
-      
+      final success = await _subscriptionService.handlePurchaseUpdate(
+        purchaseDetails,
+      );
+
+      if (!success) {
+        state = state.copyWith(isLoading: false);
+        return;
+      }
+
       state = state.copyWith(
         isLoading: false,
         isSubscribed: success,
         error: null,
         purchases: [...state.purchases, purchaseDetails],
       );
-      
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
@@ -155,9 +163,9 @@ class SubscriptionViewModel extends StateNotifier<SubscriptionState> {
   }
 
   bool get canPurchase {
-    return !state.isLoading && 
-           state.selectedProduct != null && 
-           !state.isSubscribed;
+    return !state.isLoading &&
+        state.selectedProduct != null &&
+        !state.isSubscribed;
   }
 
   bool get canRestore {
