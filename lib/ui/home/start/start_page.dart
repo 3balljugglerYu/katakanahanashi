@@ -10,6 +10,7 @@ import 'package:katakanahanashi/ui/onboarding/onboarding_page.dart';
 import 'package:katakanahanashi/data/services/supabase_service.dart';
 import 'package:katakanahanashi/config/app_config.dart';
 import 'package:katakanahanashi/ui/subscription/subscription_view_model.dart';
+import 'package:katakanahanashi/data/services/remote_config_service.dart';
 
 class StartPage extends ConsumerWidget {
   const StartPage({super.key});
@@ -18,6 +19,8 @@ class StartPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final subscriptionState = ref.watch(subscriptionViewModelProvider);
     final isSubscribed = subscriptionState.isSubscribed;
+    final remoteConfigService = ref.watch(remoteConfigServiceProvider);
+    final showSubscriptionButton = remoteConfigService.showSubscriptionButton;
 
     return Scaffold(
       backgroundColor: Colors.orange.shade50,
@@ -114,38 +117,40 @@ class StartPage extends ConsumerWidget {
                 ),
                 if (Platform.isIOS) ...[
                   const SizedBox(height: 16),
-                  TextButton(
-                    onPressed: () {
-                      Navigator.pushNamed(context, AppRouter.subscriptionRoute);
-                    },
-                    style: TextButton.styleFrom(
-                      foregroundColor: Colors.orange.shade700,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 8,
+                  if (showSubscriptionButton)
+                    TextButton(
+                      onPressed: () {
+                        Navigator.pushNamed(
+                            context, AppRouter.subscriptionRoute);
+                      },
+                      style: TextButton.styleFrom(
+                        foregroundColor: Colors.orange.shade700,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.workspace_premium,
+                            size: 18,
+                            color: Colors.orange.shade700,
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            isSubscribed ? '広告オフの状態を確認' : '広告なしで遊ぶ',
+                            style: TextStyle(
+                              fontSize: MediaQuery.of(context).size.width * 0.04,
+                              fontWeight: FontWeight.w600,
+                              decoration: TextDecoration.underline,
+                              decorationColor: Colors.orange.shade700,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.workspace_premium,
-                          size: 18,
-                          color: Colors.orange.shade700,
-                        ),
-                        const SizedBox(width: 6),
-                        Text(
-                          isSubscribed ? '広告オフの状態を確認' : '広告なしで遊ぶ',
-                          style: TextStyle(
-                            fontSize: MediaQuery.of(context).size.width * 0.04,
-                            fontWeight: FontWeight.w600,
-                            decoration: TextDecoration.underline,
-                            decorationColor: Colors.orange.shade700,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
                   if (isSubscribed) ...[
                     const SizedBox(height: 8),
                     Container(
