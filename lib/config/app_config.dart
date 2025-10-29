@@ -56,4 +56,10 @@ class AppConfig {
         return false;
     }
   }
+
+  static const String privacyPolicyUrl =
+      'https://snow-office-293.notion.site/2752ae7bded2801887f8e244676bccb1';
+
+  static const String termsOfUseUrl =
+      'https://snow-office-293.notion.site/29b2ae7bded280ff8508d31bbf337289';
 }
