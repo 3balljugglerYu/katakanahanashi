@@ -42,8 +42,9 @@ void main() async {
 
   await Firebase.initializeApp();
 
-  final remoteConfigService =
-      RemoteConfigService(FirebaseRemoteConfig.instance);
+  final remoteConfigService = RemoteConfigService.firebase(
+    FirebaseRemoteConfig.instance,
+  );
   await remoteConfigService.initialize();
 
   // Supabase初期化

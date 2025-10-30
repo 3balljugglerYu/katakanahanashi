@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "309277510079",
+    "project_id": "kotobakakurenbo",
+    "storage_bucket": "kotobakakurenbo.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:309277510079:android:1aabccd3906aa9128ab90a",
+        "android_client_info": {
+          "package_name": "com.kotoba.kakurenbo"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCQEY5513Jl1dPabyOMRXvZliStxUwAQgM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -4,7 +4,21 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:katakanahanashi/config/app_config.dart';
 
 class RemoteConfigService {
-  RemoteConfigService(this._remoteConfig);
+  RemoteConfigService._({
+    FirebaseRemoteConfig? remoteConfig,
+    Map<String, Object>? fallbackValues,
+  }) : _remoteConfig = remoteConfig,
+       _fallbackStore = fallbackValues ?? _defaultValues;
+
+  factory RemoteConfigService.firebase(FirebaseRemoteConfig remoteConfig) {
+    return RemoteConfigService._(remoteConfig: remoteConfig);
+  }
+
+  factory RemoteConfigService.fallback({Map<String, Object>? defaults}) {
+    return RemoteConfigService._(
+      fallbackValues: {..._defaultValues, if (defaults != null) ...defaults},
+    );
+  }
 
   static const String showSubscriptionButtonKey = 'show_subscription_button';
 
@@ -12,21 +26,26 @@ class RemoteConfigService {
     showSubscriptionButtonKey: true,
   };
 
-  final FirebaseRemoteConfig _remoteConfig;
+  final FirebaseRemoteConfig? _remoteConfig;
+  final Map<String, Object> _fallbackStore;
 
   Future<void> initialize() async {
+    if (_remoteConfig == null) {
+      return;
+    }
+
     final minimumFetchInterval = _minimumFetchInterval();
-    await _remoteConfig.setConfigSettings(
+    await _remoteConfig!.setConfigSettings(
       RemoteConfigSettings(
         fetchTimeout: const Duration(seconds: 10),
         minimumFetchInterval: minimumFetchInterval,
       ),
     );
 
-    await _remoteConfig.setDefaults(_defaultValues);
+    await _remoteConfig!.setDefaults(_defaultValues);
 
     try {
-      await _remoteConfig.fetchAndActivate();
+      await _remoteConfig!.fetchAndActivate();
     } catch (error, stackTrace) {
       debugPrint('RemoteConfig fetch failed: $error');
       debugPrint('$stackTrace');
@@ -34,12 +53,20 @@ class RemoteConfigService {
     }
   }
 
-  bool get showSubscriptionButton =>
-      _remoteConfig.getBool(showSubscriptionButtonKey);
+  bool get showSubscriptionButton {
+    if (_remoteConfig == null) {
+      return _fallbackStore[showSubscriptionButtonKey] as bool? ?? true;
+    }
+    return _remoteConfig!.getBool(showSubscriptionButtonKey);
+  }
 
   Future<void> forceRefresh() async {
+    if (_remoteConfig == null) {
+      return;
+    }
+
     try {
-      await _remoteConfig.fetchAndActivate();
+      await _remoteConfig!.fetchAndActivate();
     } catch (error) {
       debugPrint('RemoteConfig forceRefresh failed: $error');
     }

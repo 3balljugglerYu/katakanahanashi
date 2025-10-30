@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/material.dart';
@@ -28,10 +30,15 @@ void main() async {
   );
   MobileAds.instance.updateRequestConfiguration(requestConfiguration);
 
-  await Firebase.initializeApp();
-
-  final remoteConfigService =
-      RemoteConfigService(FirebaseRemoteConfig.instance);
+  late final RemoteConfigService remoteConfigService;
+  if (Platform.isAndroid) {
+    remoteConfigService = RemoteConfigService.fallback();
+  } else {
+    await Firebase.initializeApp();
+    remoteConfigService = RemoteConfigService.firebase(
+      FirebaseRemoteConfig.instance,
+    );
+  }
   await remoteConfigService.initialize();
 
   // Supabase初期化
