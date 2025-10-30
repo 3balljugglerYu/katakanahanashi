@@ -11,6 +11,7 @@ import 'package:katakanahanashi/data/services/supabase_service.dart';
 import 'package:katakanahanashi/config/app_config.dart';
 import 'package:katakanahanashi/ui/subscription/subscription_view_model.dart';
 import 'package:katakanahanashi/data/services/remote_config_service.dart';
+import 'package:katakanahanashi/ui/widgets/policy_links.dart';
 
 class StartPage extends ConsumerWidget {
   const StartPage({super.key});
@@ -121,7 +122,9 @@ class StartPage extends ConsumerWidget {
                     TextButton(
                       onPressed: () {
                         Navigator.pushNamed(
-                            context, AppRouter.subscriptionRoute);
+                          context,
+                          AppRouter.subscriptionRoute,
+                        );
                       },
                       style: TextButton.styleFrom(
                         foregroundColor: Colors.orange.shade700,
@@ -142,7 +145,8 @@ class StartPage extends ConsumerWidget {
                           Text(
                             isSubscribed ? '広告オフの状態を確認' : '広告なしで遊ぶ',
                             style: TextStyle(
-                              fontSize: MediaQuery.of(context).size.width * 0.04,
+                              fontSize:
+                                  MediaQuery.of(context).size.width * 0.04,
                               fontWeight: FontWeight.w600,
                               decoration: TextDecoration.underline,
                               decorationColor: Colors.orange.shade700,
@@ -187,6 +191,18 @@ class StartPage extends ConsumerWidget {
                   const SizedBox(height: 8),
                 ] else
                   const SizedBox(height: 16),
+                if (Platform.isIOS)
+                  PolicyLinks(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    useInAppWebView: true,
+                    textStyle: TextStyle(
+                      fontSize: MediaQuery.of(context).size.width * 0.035,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.orange.shade700,
+                      decoration: TextDecoration.underline,
+                      decorationColor: Colors.orange.shade700,
+                    ),
+                  ),
                 // ルール再確認ボタン
                 TextButton(
                   onPressed: () {

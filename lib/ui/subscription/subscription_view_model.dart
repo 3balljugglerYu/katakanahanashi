@@ -148,19 +148,21 @@ class SubscriptionViewModel extends StateNotifier<SubscriptionState> {
     }
   }
 
-  String get priceText {
-    if (state.selectedProduct != null) {
-      try {
-        // StoreKitの価格情報を使用
-        final price = state.selectedProduct!.price;
-        return '月額 $price';
-      } catch (e) {
-        // .storekitファイルの価格情報が取得できない場合のフォールバック
-        return '月額 ¥200 (error)';
-      }
-    }
-    return '月額 ¥200 dev'; // Development環境用フォールバック
-  }
+  static const String _fallbackPrice = '¥200';
+  static const String _billingPeriodLabel = '1か月';
+  static const String _autoRenewLabel = '1か月ごとの自動更新';
+
+  String get formattedPrice => state.selectedProduct?.price ?? _fallbackPrice;
+
+  String get priceText => '$formattedPrice / $_billingPeriodLabel（自動更新）';
+
+  String get marketingPriceCopy => '毎月$formattedPriceで広告を完全オフ';
+
+  String get subscriptionPeriodLabel => _autoRenewLabel;
+
+  String get autoRenewSummary => '更新日の24時間前までにキャンセルしない限り、自動的に更新されます。';
+
+  String get cancellationPolicy => 'いつでも解約できます。解約しても請求期間の最後まで広告なしで利用できます。';
 
   bool get canPurchase {
     return !state.isLoading &&

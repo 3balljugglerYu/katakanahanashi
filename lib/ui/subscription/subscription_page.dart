@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'subscription_view_model.dart';
+import 'package:katakanahanashi/ui/widgets/policy_links.dart';
+
 import 'subscription_state.dart';
+import 'subscription_view_model.dart';
 
 class SubscriptionPage extends ConsumerWidget {
   const SubscriptionPage({super.key});
@@ -24,7 +26,7 @@ class SubscriptionPage extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildHeroSection(colorScheme),
+              _buildHeroSection(colorScheme, viewModel),
               const SizedBox(height: 24),
               _buildBenefitSection(colorScheme),
               const SizedBox(height: 24),
@@ -40,6 +42,18 @@ class SubscriptionPage extends ConsumerWidget {
               ],
               _buildActionButtons(context, state, viewModel),
               const SizedBox(height: 16),
+              PolicyLinks(
+                alignment: WrapAlignment.start,
+                padding: const EdgeInsets.only(bottom: 12),
+                textStyle: TextStyle(
+                  fontSize:
+                      Theme.of(context).textTheme.bodySmall?.fontSize ?? 12,
+                  fontWeight: FontWeight.w600,
+                  color: colorScheme.primary,
+                  decoration: TextDecoration.underline,
+                  decorationColor: colorScheme.primary,
+                ),
+              ),
               _buildNote(),
             ],
           ),
@@ -48,16 +62,16 @@ class SubscriptionPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildHeroSection(ColorScheme colorScheme) {
+  Widget _buildHeroSection(
+    ColorScheme colorScheme,
+    SubscriptionViewModel viewModel,
+  ) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [
-            Colors.orange.shade400,
-            Colors.orange.shade600,
-          ],
+          colors: [Colors.orange.shade400, Colors.orange.shade600],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -119,12 +133,26 @@ class SubscriptionPage extends ConsumerWidget {
               color: Colors.white,
               borderRadius: BorderRadius.circular(16),
             ),
-            child: Text(
-              '月額200円で広告を完全オフ',
-              style: TextStyle(
-                color: colorScheme.primary,
-                fontWeight: FontWeight.bold,
-              ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  viewModel.marketingPriceCopy,
+                  style: TextStyle(
+                    color: colorScheme.primary,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  viewModel.subscriptionPeriodLabel,
+                  style: TextStyle(
+                    color: colorScheme.primary.withValues(alpha: 0.8),
+                    fontWeight: FontWeight.w600,
+                    fontSize: 12,
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -179,9 +207,7 @@ class SubscriptionPage extends ConsumerWidget {
               ),
               title: Text(
                 benefit.title,
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                ),
+                style: const TextStyle(fontWeight: FontWeight.bold),
               ),
               subtitle: Text(benefit.description),
             ),
@@ -191,7 +217,10 @@ class SubscriptionPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildPriceCard(BuildContext context, SubscriptionViewModel viewModel) {
+  Widget _buildPriceCard(
+    BuildContext context,
+    SubscriptionViewModel viewModel,
+  ) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
@@ -212,14 +241,11 @@ class SubscriptionPage extends ConsumerWidget {
         children: [
           const Text(
             'プラン',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-            ),
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 12),
           Text(
-            viewModel.priceText,
+            viewModel.formattedPrice,
             style: const TextStyle(
               fontSize: 28,
               fontWeight: FontWeight.bold,
@@ -227,41 +253,63 @@ class SubscriptionPage extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 8),
-          const Text(
-            'いつでも解約できます。解約しても請求期間の最後まで広告なしで利用できます。',
+          Text(
+            '期間: ${viewModel.subscriptionPeriodLabel}',
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            viewModel.autoRenewSummary,
+            style: const TextStyle(fontSize: 13),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            viewModel.cancellationPolicy,
+            style: const TextStyle(fontSize: 13),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            '税込価格のため追加費用は発生しません。',
+            style: TextStyle(fontSize: 12, color: Colors.grey.shade700),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildActionButtons(BuildContext context, SubscriptionState state, SubscriptionViewModel viewModel) {
+  Widget _buildActionButtons(
+    BuildContext context,
+    SubscriptionState state,
+    SubscriptionViewModel viewModel,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         ElevatedButton(
-          onPressed: viewModel.canPurchase ? () async {
-            try {
-              await viewModel.purchaseSubscription();
-              if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('購入処理を開始しました'),
-                    backgroundColor: Colors.green,
-                  ),
-                );
-              }
-            } catch (e) {
-              if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('購入に失敗しました: $e'),
-                    backgroundColor: Colors.red,
-                  ),
-                );
-              }
-            }
-          } : null,
+          onPressed: viewModel.canPurchase
+              ? () async {
+                  try {
+                    await viewModel.purchaseSubscription();
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('購入処理を開始しました'),
+                          backgroundColor: Colors.green,
+                        ),
+                      );
+                    }
+                  } catch (e) {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('購入に失敗しました: $e'),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
+                    }
+                  }
+                }
+              : null,
           style: ElevatedButton.styleFrom(
             backgroundColor: state.isSubscribed ? Colors.grey : Colors.orange,
             foregroundColor: Colors.white,
@@ -270,44 +318,49 @@ class SubscriptionPage extends ConsumerWidget {
               borderRadius: BorderRadius.circular(16),
             ),
           ),
-          child: state.isLoading 
-            ? const SizedBox(
-                height: 20,
-                width: 20,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+          child: state.isLoading
+              ? const SizedBox(
+                  height: 20,
+                  width: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  ),
+                )
+              : Text(
+                  state.isSubscribed ? '購読済み' : '購読して広告をオフにする',
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              )
-            : Text(
-                state.isSubscribed ? '購読済み' : '購読して広告をオフにする',
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              ),
         ),
         const SizedBox(height: 12),
         OutlinedButton(
-          onPressed: viewModel.canRestore ? () async {
-            try {
-              await viewModel.restorePurchases();
-              if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('購入情報の復元を開始しました'),
-                    backgroundColor: Colors.blue,
-                  ),
-                );
-              }
-            } catch (e) {
-              if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('復元に失敗しました: $e'),
-                    backgroundColor: Colors.red,
-                  ),
-                );
-              }
-            }
-          } : null,
+          onPressed: viewModel.canRestore
+              ? () async {
+                  try {
+                    await viewModel.restorePurchases();
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('購入情報の復元を開始しました'),
+                          backgroundColor: Colors.blue,
+                        ),
+                      );
+                    }
+                  } catch (e) {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('復元に失敗しました: $e'),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
+                    }
+                  }
+                }
+              : null,
           style: OutlinedButton.styleFrom(
             foregroundColor: Colors.orange.shade800,
             side: BorderSide(color: Colors.orange.shade300, width: 1.5),
@@ -335,10 +388,7 @@ class SubscriptionPage extends ConsumerWidget {
             Icon(Icons.error, color: Colors.red.shade700),
             const SizedBox(width: 12),
             Expanded(
-              child: Text(
-                error,
-                style: TextStyle(color: Colors.red.shade700),
-              ),
+              child: Text(error, style: TextStyle(color: Colors.red.shade700)),
             ),
             IconButton(
               onPressed: viewModel.clearError,
@@ -373,7 +423,11 @@ class SubscriptionPage extends ConsumerWidget {
 
   Widget _buildNote() {
     return const Text(
-      '※ アプリ内で購読すると iTunes アカウントに課金されます。\n※ 解約は iOS 設定アプリの「サブスクリプション」からいつでも行えます。',
+      '※ Comfort Play メンバーシップは1か月ごとの自動更新サブスクリプションです。\n'
+      '※ 購入確認後、料金は iTunes アカウントに請求されます。\n'
+      '※ 更新日の24時間前までにキャンセルしない限り、自動的に更新され、期間終了前の24時間以内に更新料金が請求されます。\n'
+      '※ 解約は iOS 設定アプリの「サブスクリプション」からいつでも行えます。\n'
+      '※ 購読期間内のキャンセルによる日割り返金は行われません。',
       style: TextStyle(fontSize: 12, color: Colors.black54, height: 1.5),
     );
   }
