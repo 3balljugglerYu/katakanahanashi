@@ -43,8 +43,9 @@ void main() async {
 
   await Firebase.initializeApp();
 
-  final remoteConfigService =
-      RemoteConfigService(FirebaseRemoteConfig.instance);
+  final remoteConfigService = RemoteConfigService.firebase(
+    FirebaseRemoteConfig.instance,
+  );
   await remoteConfigService.initialize();
 
   // 本番環境ではテストデバイス設定なし（コメントアウト）
