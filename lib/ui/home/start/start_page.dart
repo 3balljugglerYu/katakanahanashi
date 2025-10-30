@@ -194,6 +194,7 @@ class StartPage extends ConsumerWidget {
                 if (Platform.isIOS)
                   PolicyLinks(
                     padding: const EdgeInsets.only(bottom: 8),
+                    useInAppWebView: true,
                     textStyle: TextStyle(
                       fontSize: MediaQuery.of(context).size.width * 0.035,
                       fontWeight: FontWeight.w600,

@@ -10,12 +10,14 @@ class PolicyLinks extends StatelessWidget {
     this.padding = EdgeInsets.zero,
     this.textStyle,
     this.spacing = 16,
+    this.useInAppWebView = false,
   });
 
   final WrapAlignment alignment;
   final EdgeInsetsGeometry padding;
   final TextStyle? textStyle;
   final double spacing;
+  final bool useInAppWebView;
 
   @override
   Widget build(BuildContext context) {
@@ -67,7 +69,12 @@ class PolicyLinks extends StatelessWidget {
 
   Future<void> _openUrl(BuildContext context, String url) async {
     final uri = Uri.parse(url);
-    final launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
+    final launched = await launchUrl(
+      uri,
+      mode: useInAppWebView
+          ? LaunchMode.inAppWebView
+          : LaunchMode.externalApplication,
+    );
     if (!launched && context.mounted) {
       ScaffoldMessenger.of(
         context,
