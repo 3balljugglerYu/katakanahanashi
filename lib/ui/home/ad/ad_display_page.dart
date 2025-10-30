@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:katakanahanashi/config/app_config.dart';
 import 'package:katakanahanashi/data/services/ad_service.dart';
 import 'package:katakanahanashi/navigator/app_router.dart';
 import 'package:katakanahanashi/ui/home/game/game_page.dart';
@@ -51,13 +50,6 @@ class _AdDisplayPageState extends ConsumerState<AdDisplayPage>
     } else {
       _startAdFlow();
     }
-
-    ref.listen(subscriptionViewModelProvider, (previous, next) {
-      final wasSubscribed = previous?.isSubscribed ?? false;
-      if (!wasSubscribed && next.isSubscribed) {
-        _scheduleReturnToTop();
-      }
-    });
   }
 
   void _startAdFlow() {
@@ -199,6 +191,13 @@ class _AdDisplayPageState extends ConsumerState<AdDisplayPage>
 
   @override
   Widget build(BuildContext context) {
+    ref.listen(subscriptionViewModelProvider, (previous, next) {
+      final wasSubscribed = previous?.isSubscribed ?? false;
+      if (!wasSubscribed && next.isSubscribed) {
+        _scheduleReturnToTop();
+      }
+    });
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: Stack(
