@@ -61,6 +61,7 @@ class AppConfig {
       'com.kotoba.kakurenbo.playease.monthly';
   static const String _androidMockSubscriptionProductId =
       'com.example.mock.monthly';
+  static const String _androidPackageBase = 'com.kotoba.kakurenbo';
 
   static String get iosSubscriptionProductId => _sharedSubscriptionProductId;
 
@@ -81,6 +82,17 @@ class AppConfig {
       case Environment.development:
       case Environment.staging:
         return true;
+    }
+  }
+
+  static String get androidPackageName {
+    switch (_environment) {
+      case Environment.production:
+        return _androidPackageBase;
+      case Environment.staging:
+        return '${_androidPackageBase}.stg';
+      case Environment.development:
+        return '${_androidPackageBase}.dev';
     }
   }
 

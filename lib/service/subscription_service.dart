@@ -5,6 +5,8 @@ import 'package:flutter/services.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:katakanahanashi/config/app_config.dart';
+import 'package:katakanahanashi/data/services/subscription_verification_service.dart';
+import 'package:katakanahanashi/service/billing_client_service.dart';
 
 class SubscriptionService {
   StreamController<List<PurchaseDetails>>? _mockPurchaseController;
@@ -14,7 +16,16 @@ class SubscriptionService {
 
   static const String _subscriptionKey = 'subscription_status';
 
-  final InAppPurchase _inAppPurchase = InAppPurchase.instance;
+  SubscriptionService({
+    BillingClientService? billingClientService,
+    SubscriptionVerificationService? verificationService,
+  })  : _billingClientService =
+            billingClientService ?? BillingClientService(),
+        _verificationService =
+            verificationService ?? SubscriptionVerificationService();
+
+  final BillingClientService _billingClientService;
+  final SubscriptionVerificationService _verificationService;
   StreamSubscription<List<PurchaseDetails>>? _subscription;
 
   Stream<List<PurchaseDetails>> get purchaseStream {
@@ -23,7 +34,7 @@ class SubscriptionService {
           StreamController<List<PurchaseDetails>>.broadcast();
       return _mockPurchaseController!.stream;
     }
-    return _inAppPurchase.purchaseStream;
+    return _billingClientService.purchaseStream;
   }
 
   static String get _monthlyProductId {
@@ -41,7 +52,7 @@ class SubscriptionService {
     if (_useMockBilling) {
       return;
     }
-    final bool available = await _inAppPurchase.isAvailable();
+    final bool available = await _billingClientService.isAvailable();
     if (!available) {
       throw Exception('In-app purchase is not available');
     }
@@ -53,8 +64,8 @@ class SubscriptionService {
     }
     final Set<String> productIds = {_monthlyProductId};
     print('[💰DEBUG] Querying product ID: $_monthlyProductId');
-    final ProductDetailsResponse response = await _inAppPurchase
-        .queryProductDetails(productIds);
+    final ProductDetailsResponse response =
+        await _billingClientService.queryProductDetails(productIds);
 
     if (response.error != null) {
       throw Exception('Failed to load products: ${response.error!.message}');
@@ -79,13 +90,8 @@ class SubscriptionService {
       _emitMockPurchaseSuccess();
       return true;
     }
-    final PurchaseParam purchaseParam = PurchaseParam(productDetails: product);
-
     try {
-      final bool success = await _inAppPurchase.buyNonConsumable(
-        purchaseParam: purchaseParam,
-      );
-      return success;
+      return await _billingClientService.purchase(product);
     } on PlatformException catch (e) {
       if (e.code == 'purchase_cancelled') {
         return false;
@@ -103,7 +109,7 @@ class SubscriptionService {
       return;
     }
     try {
-      await _inAppPurchase.restorePurchases();
+      await _billingClientService.restorePurchases();
     } catch (e) {
       throw Exception('Restore failed: $e');
     }
@@ -125,12 +131,11 @@ class SubscriptionService {
       return true;
     }
     if (purchaseDetails.status == PurchaseStatus.purchased) {
-      // サブスクリプション購入完了
-      await setSubscriptionStatus(true);
+      await _verifyAndPersist(purchaseDetails);
 
       // iOS では購入完了を通知する必要がある
       if (Platform.isIOS) {
-        await _inAppPurchase.completePurchase(purchaseDetails);
+        await _billingClientService.completePurchase(purchaseDetails);
       }
 
       return true;
@@ -145,7 +150,7 @@ class SubscriptionService {
       return false;
     } else if (purchaseDetails.status == PurchaseStatus.restored) {
       // 購入復元
-      await setSubscriptionStatus(true);
+      await _verifyAndPersist(purchaseDetails);
       return true;
     }
 
@@ -161,7 +166,7 @@ class SubscriptionService {
       _subscription = _mockPurchaseController!.stream.listen(onPurchaseUpdate);
       return;
     }
-    _subscription = _inAppPurchase.purchaseStream.listen(onPurchaseUpdate);
+    _subscription = _billingClientService.purchaseStream.listen(onPurchaseUpdate);
   }
 
   void dispose() {
@@ -200,5 +205,16 @@ class SubscriptionService {
       ),
     );
     controller.add([purchaseDetails]);
+  }
+
+  Future<void> _verifyAndPersist(PurchaseDetails purchaseDetails) async {
+    final result =
+        await _verificationService.verifyPurchase(purchaseDetails);
+
+    if (!result.isValid) {
+      throw Exception(result.message ?? 'Purchase verification failed');
+    }
+
+    await setSubscriptionStatus(result.isActive);
   }
 }
