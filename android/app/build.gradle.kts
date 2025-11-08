@@ -96,4 +96,5 @@ flutter {
 
 dependencies {
     implementation(platform("com.google.firebase:firebase-bom:34.4.0"))
+    implementation("com.android.billingclient:billing-ktx:6.1.0")
 }

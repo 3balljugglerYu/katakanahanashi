@@ -57,6 +57,33 @@ class AppConfig {
     }
   }
 
+  static const String _sharedSubscriptionProductId =
+      'com.kotoba.kakurenbo.playease.monthly';
+  static const String _androidMockSubscriptionProductId =
+      'com.example.mock.monthly';
+
+  static String get iosSubscriptionProductId => _sharedSubscriptionProductId;
+
+  static String get androidSubscriptionProductId {
+    switch (_environment) {
+      case Environment.production:
+        return _sharedSubscriptionProductId;
+      case Environment.development:
+      case Environment.staging:
+        return _androidMockSubscriptionProductId;
+    }
+  }
+
+  static bool get isMockBillingEnabled {
+    switch (_environment) {
+      case Environment.production:
+        return false;
+      case Environment.development:
+      case Environment.staging:
+        return true;
+    }
+  }
+
   static const String privacyPolicyUrl =
       'https://snow-office-293.notion.site/2752ae7bded2801887f8e244676bccb1';
 

@@ -22,6 +22,9 @@ class StartPage extends ConsumerWidget {
     final isSubscribed = subscriptionState.isSubscribed;
     final remoteConfigService = ref.watch(remoteConfigServiceProvider);
     final showSubscriptionButton = remoteConfigService.showSubscriptionButton;
+    final isMobilePlatform = Platform.isIOS || Platform.isAndroid;
+    final shouldShowSubscriptionButton =
+        showSubscriptionButton && isMobilePlatform;
 
     return Scaffold(
       backgroundColor: Colors.orange.shade50,
@@ -116,9 +119,9 @@ class StartPage extends ConsumerWidget {
                     ),
                   ),
                 ),
-                if (Platform.isIOS) ...[
-                  const SizedBox(height: 16),
-                  if (showSubscriptionButton)
+                const SizedBox(height: 16),
+                if (isMobilePlatform) ...[
+                  if (shouldShowSubscriptionButton)
                     TextButton(
                       onPressed: () {
                         Navigator.pushNamed(
@@ -188,13 +191,45 @@ class StartPage extends ConsumerWidget {
                       ),
                     ),
                   ],
+                  if (isSubscribed) ...[
+                    const SizedBox(height: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.orange.shade100,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.check_circle,
+                            size: 18,
+                            color: Colors.orange.shade700,
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            '広告オフが有効です',
+                            style: TextStyle(
+                              fontSize:
+                                  MediaQuery.of(context).size.width * 0.035,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.orange.shade700,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                   const SizedBox(height: 8),
-                ] else
-                  const SizedBox(height: 16),
-                if (Platform.isIOS)
+                ],
+                if (isMobilePlatform)
                   PolicyLinks(
                     padding: const EdgeInsets.only(bottom: 8),
-                    useInAppWebView: true,
+                    useInAppWebView: Platform.isIOS,
                     textStyle: TextStyle(
                       fontSize: MediaQuery.of(context).size.width * 0.035,
                       fontWeight: FontWeight.w600,
