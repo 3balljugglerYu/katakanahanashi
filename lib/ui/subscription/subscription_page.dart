@@ -1,6 +1,9 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:katakanahanashi/ui/widgets/policy_links.dart';
+import 'package:katakanahanashi/config/app_config.dart';
 
 import 'subscription_state.dart';
 import 'subscription_view_model.dart';
@@ -282,6 +285,9 @@ class SubscriptionPage extends ConsumerWidget {
     SubscriptionState state,
     SubscriptionViewModel viewModel,
   ) {
+    final showMockInfo =
+        AppConfig.isMockBillingEnabled && Platform.isAndroid;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -374,6 +380,10 @@ class SubscriptionPage extends ConsumerWidget {
             style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
           ),
         ),
+        if (showMockInfo) ...[
+          const SizedBox(height: 12),
+          _buildMockBillingInfoCard(),
+        ],
       ],
     );
   }
@@ -393,6 +403,32 @@ class SubscriptionPage extends ConsumerWidget {
             IconButton(
               onPressed: viewModel.clearError,
               icon: const Icon(Icons.close),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMockBillingInfoCard() {
+    return Card(
+      color: Colors.orange.shade50,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(Icons.info_outline, color: Colors.orange.shade600),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                '現在は開発用のモック課金モードで動作しています。Google Play Console で SKU を公開し、本番ビルドを利用すると実際の課金フローと Supabase 検証が有効になります。',
+                style: TextStyle(
+                  color: Colors.orange.shade800,
+                  fontSize: 13,
+                  height: 1.4,
+                ),
+              ),
             ),
           ],
         ),

@@ -67,9 +67,10 @@ class SubscriptionViewModel extends StateNotifier<SubscriptionState> {
         selectedProduct: products.isNotEmpty ? products.first : null,
       );
     } catch (e) {
+      final errorMessage = e.toString();
       state = state.copyWith(
         isLoading: false,
-        error: 'Failed to load products: $e',
+        error: _mapProductLoadError(errorMessage),
       );
     }
   }
@@ -94,7 +95,10 @@ class SubscriptionViewModel extends StateNotifier<SubscriptionState> {
 
       // 購入結果は _handlePurchaseUpdate で処理される（成功時）
     } catch (e) {
-      state = state.copyWith(isLoading: false, error: 'Purchase failed: $e');
+      state = state.copyWith(
+        isLoading: false,
+        error: 'Purchase failed: $e',
+      );
     }
   }
 
@@ -180,6 +184,16 @@ class SubscriptionViewModel extends StateNotifier<SubscriptionState> {
 
   void clearError() {
     state = state.copyWith(error: null);
+  }
+
+  String _mapProductLoadError(String rawError) {
+    if (rawError.contains('No products found')) {
+      return 'Play Console で SKU がまだ公開されていないため、商品情報を取得できませんでした。';
+    }
+    if (rawError.contains('Item unavailable')) {
+      return '対象のサブスクリプションが利用できません。SKU とテスター設定を確認してください。';
+    }
+    return 'Failed to load products: $rawError';
   }
 
   @override
