@@ -157,16 +157,24 @@ class SubscriptionService {
     return false;
   }
 
-  void listenToPurchaseUpdated(
-    Function(List<PurchaseDetails>) onPurchaseUpdate,
-  ) {
+  StreamSubscription<List<PurchaseDetails>> listenToPurchaseUpdated(
+    void Function(List<PurchaseDetails>) onPurchaseUpdate, {
+    void Function(Object, StackTrace)? onError,
+  }) {
     if (_useMockBilling) {
       _mockPurchaseController ??=
           StreamController<List<PurchaseDetails>>.broadcast();
-      _subscription = _mockPurchaseController!.stream.listen(onPurchaseUpdate);
-      return;
+      _subscription = _mockPurchaseController!.stream.listen(
+        onPurchaseUpdate,
+        onError: onError,
+      );
+      return _subscription!;
     }
-    _subscription = _billingClientService.purchaseStream.listen(onPurchaseUpdate);
+    _subscription = _billingClientService.purchaseStream.listen(
+      onPurchaseUpdate,
+      onError: onError,
+    );
+    return _subscription!;
   }
 
   void dispose() {

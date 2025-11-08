@@ -30,9 +30,11 @@ class SubscriptionViewModel extends StateNotifier<SubscriptionState> {
       await _subscriptionService.initialize();
 
       // 購入ストリームの監視を開始
-      _purchaseSubscription = _subscriptionService.purchaseStream.listen(
-        _handlePurchaseUpdate,
-        onError: (error) {
+      _purchaseSubscription = _subscriptionService.listenToPurchaseUpdated(
+        (purchases) {
+          unawaited(_handlePurchaseUpdate(purchases));
+        },
+        onError: (error, stackTrace) {
           state = state.copyWith(
             isLoading: false,
             error: 'Purchase stream error: $error',
@@ -117,9 +119,11 @@ class SubscriptionViewModel extends StateNotifier<SubscriptionState> {
     }
   }
 
-  void _handlePurchaseUpdate(List<PurchaseDetails> purchaseDetailsList) {
+  Future<void> _handlePurchaseUpdate(
+    List<PurchaseDetails> purchaseDetailsList,
+  ) async {
     for (final purchaseDetails in purchaseDetailsList) {
-      _processPurchase(purchaseDetails);
+      await _processPurchase(purchaseDetails);
     }
   }
 
